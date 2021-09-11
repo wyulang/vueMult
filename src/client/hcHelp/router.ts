@@ -21,7 +21,47 @@ const routes = [
         mate: {
           title: ""
         },
-      }
+      },
+      {
+        path: '/product',
+        component: () => import(/* webpackChunkName: "introduce" */ './page/home/product.vue'),
+        name: 'home.product',
+        mate: {
+          title: ""
+        },
+      },
+      {
+        path: '/product/detail',
+        component: () => import(/* webpackChunkName: "introduce" */ './page/home/detail.vue'),
+        name: 'home.detail',
+        mate: {
+          title: ""
+        },
+      },
+      {
+        path: '/user/order',
+        component: () => import(/* webpackChunkName: "introduce" */ './page/home/my.order.vue'),
+        name: 'user.order',
+        mate: {
+          title: ""
+        },
+      },
+      {
+        path: '/user/info',
+        component: () => import(/* webpackChunkName: "introduce" */ './page/home/my.info.vue'),
+        name: 'user.info',
+        mate: {
+          title: ""
+        },
+      },
+      {
+        path: '/user/password',
+        component: () => import(/* webpackChunkName: "introduce" */ './page/home/my.password.vue'),
+        name: 'user.password',
+        mate: {
+          title: ""
+        },
+      },
     ]
   },
   {

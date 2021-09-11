@@ -24,6 +24,9 @@ export default class App extends Vue {
     .title {
       color: #398cff;
     }
+    h1{
+      color: #398cff;
+    }
   }
 }
 .m-body {

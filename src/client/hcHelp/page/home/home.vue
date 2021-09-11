@@ -15,7 +15,7 @@
 
     <div class="w-all bc-f6 flex ai-c jc-c pt30 pb30">
       <div class="flex-line ra-5 hidden ai-c">
-        <input placeholder="请输入关键词" class="pp15 h-60  fs-22 ipt ipt-defalut w-500" type="text">
+        <input placeholder="请输入关键词" class="pp15 h-60 fs-22 ipt ipt-defalut w-500" type="text">
         <button class="w-150 h-60 flex ai-c jc-c btn-primary">
           <span class="iconfont icon-sousuo fs-25 fc-fff"></span>
           <span class="fs-22 ml5">搜索</span>
@@ -25,7 +25,7 @@
 
     <section class="w-1300 pt30 m-auto">
       <div class="flex w-all fw jc-b">
-        <div v-for="item in 24" class="hidden picfilter mb30 hand sha-card flex fd-c bc-fff ra-4" style="height: 366px; width: 310px;">
+        <div @click="$router.push('/product/detail')" v-for="item in 24" class="hidden picfilter mb30 hand sha-card flex fd-c bc-fff ra-4" style="height: 366px; width: 310px;">
           <div class="w-all rel hidden" style="height: 176px;">
             <div class="w-72 zi-120 abs ab18 al20 h-30 flex ai-c fc-fff fs-12 jc-c ra-15 ba-2">纹管</div>
             <img src="http://admin.baikehuicai.com/storage/common/20210529/20210529233551_6.jpg" alt="" class="w-all rel zi-100 hall ">
