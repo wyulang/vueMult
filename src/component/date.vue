@@ -1,69 +1,67 @@
 <template>
-  <div class="w-all">
-    <div :class="class" class="flex rel w-all">
-      <input @click="inputSelect" readonly v-model="currValue" ref="dateInput" :class="{'ipt-small':size=='small','ipt-big':size=='big'}" class="ipt w-all" type="text">
-      <div @click.stop :class="{'at35':size=='small','at42':size=='big'}" v-if="visible" class="abs zi-8888 al0">
-        <div class="flex-line bc-fff ra-5 sha-card pp10 fd-c">
-          <div class="w-280 flex ai-c pb5 pt5 jc-b">
-            <div @click="changeYear('prev')" class="pl15 pr10 hand">
-              <svg viewBox="0 0 1024 1024" width="15" height="15">
-                <path
-                  d="M239.9 512l298.9-301.7c22-22.2 22-58.2 0-80.4l-19.9-20.1c-22-22.2-57.7-22.2-79.7 0L101.5 450.7l-1 1-19.9 20.2c-22 22.1-22 58.2 0 80.4l19.9 20.1 0.4 0.4 338.3 341.5c22 22.2 57.7 22.2 79.7 0l19.9-20.1c22-22.2 22-58.3 0-80.5L239.9 512z m404.7 0l298.9-301.7c22-22.2 22-58.2 0-80.4l-19.9-20.1c-22-22.2-57.7-22.2-79.7 0L506.1 450.7l-1 1-19.9 20.2c-22 22.1-22 58.2 0 80.4l19.9 20.1 0.4 0.4 338.3 341.5c22 22.2 57.7 22.2 79.7 0l19.9-20.1c22-22.2 22-58.3 0-80.5L644.6 512z"
-                  fill="#999"></path>
-              </svg>
-            </div>
-            <div @click="changeMonth('prev')" class="pl5 pr5 hand">
-              <svg viewBox="0 0 1024 1024" width="15" height="15">
-                <path d="M264.7 555l387.1 387.2c23.7 23.8 62.3 23.8 86.1 0l21.4-21.5c23.8-23.8 23.8-62.3 0-86L436.7 512l322.6-322.6c23.8-23.8 23.8-62.3 0-86l-21.4-21.5c-23.8-23.8-62.3-23.8-86.1 0L264.7 469c-23.8 23.7-23.8 62.3 0 86z" fill="#999"></path>
-              </svg>
-            </div>
-            <div class="flex-1 flex fs-15 fb ai-c jc-c">
-              <span @click="isYear=!isYear;isMonth=false;" class="pr10 hand">{{selectYear}} 年</span>
-              <span @click="isMonth=!isMonth;isYear=false;" class="pl10 hand">{{selectMonth}} 月</span>
-            </div>
-            <div @click="changeMonth('next')" class="pl5 pr5 hand">
-              <svg viewBox="0 0 1024 1024" width="15" height="15">
-                <path d="M759.3 469L372.2 81.8c-23.7-23.8-62.3-23.8-86.1 0l-21.4 21.5c-23.8 23.8-23.8 62.3 0 86L587.3 512 264.7 834.6c-23.8 23.8-23.8 62.3 0 86l21.4 21.5c23.8 23.8 62.3 23.8 86.1 0L759.3 555c23.8-23.7 23.8-62.3 0-86z" fill="#999"></path>
-              </svg>
-            </div>
-            <div @click="changeYear('next')" class="pr15 pl10 hand">
-              <svg viewBox="0 0 1024 1024" width="15" height="15">
-                <path
-                  d="M784.1 512L485.2 813.7c-22 22.2-22 58.2 0 80.4l19.9 20.1c22 22.2 57.7 22.2 79.7 0l337.7-340.9 1-1 19.9-20.2c22-22.1 22-58.2 0-80.4l-19.9-20.1-0.4-0.4-338.3-341.5c-22-22.2-57.7-22.2-79.7 0l-19.9 20.1c-22 22.2-22 58.3 0 80.5L784.1 512z m-404.7 0L80.5 813.7c-22 22.2-22 58.2 0 80.4l19.9 20.1c22 22.2 57.7 22.2 79.7 0l337.7-340.9 1-1 19.9-20.2c22-22.1 22-58.2 0-80.4l-19.9-20.1-0.4-0.4-338.3-341.5c-22-22.2-57.7-22.2-79.7 0l-19.9 20.1c-22 22.2-22 58.3 0 80.5L379.4 512z"
-                  fill="#999"></path>
-              </svg>
-            </div>
+  <div :class="class" class="flex rel w-all">
+    <input @click="inputSelect" :placeholder="placeholder" readonly v-model="currValue" ref="dateInput" :class="{'ipt-small':size=='small','ipt-big':size=='big'}" class="ipt w-all" type="text">
+    <div @click.stop :class="{'at35':size=='small','at42':size=='big'}" v-if="visible" class="abs zi-8888 al0">
+      <div class="flex-line bc-fff ra-5 sha-card pp10 fd-c">
+        <div class="w-280 flex ai-c pb5 pt5 jc-b">
+          <div @click="changeYear('prev')" class="pl15 pr10 hand">
+            <svg viewBox="0 0 1024 1024" width="15" height="15">
+              <path
+                d="M239.9 512l298.9-301.7c22-22.2 22-58.2 0-80.4l-19.9-20.1c-22-22.2-57.7-22.2-79.7 0L101.5 450.7l-1 1-19.9 20.2c-22 22.1-22 58.2 0 80.4l19.9 20.1 0.4 0.4 338.3 341.5c22 22.2 57.7 22.2 79.7 0l19.9-20.1c22-22.2 22-58.3 0-80.5L239.9 512z m404.7 0l298.9-301.7c22-22.2 22-58.2 0-80.4l-19.9-20.1c-22-22.2-57.7-22.2-79.7 0L506.1 450.7l-1 1-19.9 20.2c-22 22.1-22 58.2 0 80.4l19.9 20.1 0.4 0.4 338.3 341.5c22 22.2 57.7 22.2 79.7 0l19.9-20.1c22-22.2 22-58.3 0-80.5L644.6 512z"
+                fill="#999"></path>
+            </svg>
           </div>
-          <div class="w-280 rel flex fc-111 fw">
-            <div v-for="item in weekList" class="w-40 bb-d h-40 flex ai-c mb6 jc-c">{{item}}</div>
-            <div @click="setDateValue(item)" :class="setClass(item)" v-for="item in row" class="w-40 fs-13 h-38 flex ai-c jc-c">
-              {{(currDay==item.value&&item.type=='curr')?'今天':item.day}}
-            </div>
-            <section @click="isMonth=false" v-if="isMonth" class="abs at0 ab0 ar0 al0 pp20 flex ai-c jc-c ba-f9">
-              <div class="flex sha-6 ra-5 hidden fw">
-                <div @click.stop="selectMonth=index+1;isMonth=false;" v-for="(month,index) in monthList" :class="{'fc-primary fb fs-15':selectMonth==index+1}" class="wb-33 fs-15 flex ai-c jc-c hand h-35">{{month}}</div>
-              </div>
-            </section>
-            <section @click="isYear=false" v-if="isYear" class="abs at0 ab0 ar0 al0 pp10 flex fd-c ai-c jc-c ba-f9">
-              <div @click.stop="setYear('prev')" class="w-all pb5 hand flex ai-c jc-c">
-                <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-                  <path fill="#999"
-                    d="M872.523053 824.446082l-718.53082 0c-39.763632 0-71.922053-31.909757-71.922053-71.675436 0-18.485003 7.095605-35.205826 18.486026-47.872311L455.885981 230.77294399c23.810289-31.400151 68.641333-37.993313 100.29731-14.18302399 5.570879 4.052293 10.384511 8.873088 14.18302399 14.190187L929.764755 709.958584c23.547299 31.407314 17.217127 76.479859-14.436804 100.041484-12.922311 9.881045-27.864628 14.43885-42.804898 14.43884999l0 0L872.523053 824.446082zM872.523053 824.446082">
-                  </path>
-                </svg>
-              </div>
-              <div class="flex sha-6 ra-5 hidden fw">
-                <div @click.stop="selectYear=years;isYear=false;" v-for="(years,index) in yearList" :class="{'fc-primary fb fs-15':selectYear==years}" class="wb-20 fs-15 flex ai-c jc-c hand h-35">{{years}}</div>
-              </div>
-              <div @click.stop="setYear('next')" class="w-all pt5 hand flex ai-c jc-c">
-                <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-                  <path fill="#999"
-                    d="M871.424 200.704c14.848 0 29.696 4.608 43.008 14.336 31.744 23.552 37.888 68.608 14.336 99.84l-359.424 479.232c-3.584 5.12-8.704 10.24-14.336 14.336-31.744 24.064-76.288 17.408-100.352-14.336L99.328 320.512c-11.264-12.8-18.432-29.184-18.432-48.128 0-39.936 32.256-71.68 71.68-71.68h718.848z">
-                  </path>
-                </svg>
-              </div>
-            </section>
+          <div @click="changeMonth('prev')" class="pl5 pr5 hand">
+            <svg viewBox="0 0 1024 1024" width="15" height="15">
+              <path d="M264.7 555l387.1 387.2c23.7 23.8 62.3 23.8 86.1 0l21.4-21.5c23.8-23.8 23.8-62.3 0-86L436.7 512l322.6-322.6c23.8-23.8 23.8-62.3 0-86l-21.4-21.5c-23.8-23.8-62.3-23.8-86.1 0L264.7 469c-23.8 23.7-23.8 62.3 0 86z" fill="#999"></path>
+            </svg>
           </div>
+          <div class="flex-1 flex fs-15 fb ai-c jc-c">
+            <span @click="isYear=!isYear;isMonth=false;" class="pr10 hand">{{selectYear}} 年</span>
+            <span @click="isMonth=!isMonth;isYear=false;" class="pl10 hand">{{selectMonth}} 月</span>
+          </div>
+          <div @click="changeMonth('next')" class="pl5 pr5 hand">
+            <svg viewBox="0 0 1024 1024" width="15" height="15">
+              <path d="M759.3 469L372.2 81.8c-23.7-23.8-62.3-23.8-86.1 0l-21.4 21.5c-23.8 23.8-23.8 62.3 0 86L587.3 512 264.7 834.6c-23.8 23.8-23.8 62.3 0 86l21.4 21.5c23.8 23.8 62.3 23.8 86.1 0L759.3 555c23.8-23.7 23.8-62.3 0-86z" fill="#999"></path>
+            </svg>
+          </div>
+          <div @click="changeYear('next')" class="pr15 pl10 hand">
+            <svg viewBox="0 0 1024 1024" width="15" height="15">
+              <path
+                d="M784.1 512L485.2 813.7c-22 22.2-22 58.2 0 80.4l19.9 20.1c22 22.2 57.7 22.2 79.7 0l337.7-340.9 1-1 19.9-20.2c22-22.1 22-58.2 0-80.4l-19.9-20.1-0.4-0.4-338.3-341.5c-22-22.2-57.7-22.2-79.7 0l-19.9 20.1c-22 22.2-22 58.3 0 80.5L784.1 512z m-404.7 0L80.5 813.7c-22 22.2-22 58.2 0 80.4l19.9 20.1c22 22.2 57.7 22.2 79.7 0l337.7-340.9 1-1 19.9-20.2c22-22.1 22-58.2 0-80.4l-19.9-20.1-0.4-0.4-338.3-341.5c-22-22.2-57.7-22.2-79.7 0l-19.9 20.1c-22 22.2-22 58.3 0 80.5L379.4 512z"
+                fill="#999"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="w-280 rel flex fc-111 fw">
+          <div v-for="item in weekList" class="w-40 bb-d h-40 flex ai-c mb6 jc-c">{{item}}</div>
+          <div @click="setDateValue(item)" :class="setClass(item)" v-for="item in row" class="w-40 fs-13 h-38 flex ai-c jc-c">
+            {{(currDay==item.value&&item.type=='curr')?'今天':item.day}}
+          </div>
+          <section @click="isMonth=false" v-if="isMonth" class="abs at0 ab0 ar0 al0 pp20 flex ai-c jc-c ba-f9">
+            <div class="flex sha-6 ra-5 hidden fw">
+              <div @click.stop="selectMonth=index+1;isMonth=false;" v-for="(month,index) in monthList" :class="{'fc-primary fb fs-15':selectMonth==index+1}" class="wb-33 fs-15 flex ai-c jc-c hand h-35">{{month}}</div>
+            </div>
+          </section>
+          <section @click="isYear=false" v-if="isYear" class="abs at0 ab0 ar0 al0 pp10 flex fd-c ai-c jc-c ba-f9">
+            <div @click.stop="setYear('prev')" class="w-all pb5 hand flex ai-c jc-c">
+              <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                <path fill="#999"
+                  d="M872.523053 824.446082l-718.53082 0c-39.763632 0-71.922053-31.909757-71.922053-71.675436 0-18.485003 7.095605-35.205826 18.486026-47.872311L455.885981 230.77294399c23.810289-31.400151 68.641333-37.993313 100.29731-14.18302399 5.570879 4.052293 10.384511 8.873088 14.18302399 14.190187L929.764755 709.958584c23.547299 31.407314 17.217127 76.479859-14.436804 100.041484-12.922311 9.881045-27.864628 14.43885-42.804898 14.43884999l0 0L872.523053 824.446082zM872.523053 824.446082">
+                </path>
+              </svg>
+            </div>
+            <div class="flex sha-6 ra-5 hidden fw">
+              <div @click.stop="selectYear=years;isYear=false;" v-for="(years,index) in yearList" :class="{'fc-primary fb fs-15':selectYear==years}" class="wb-20 fs-15 flex ai-c jc-c hand h-35">{{years}}</div>
+            </div>
+            <div @click.stop="setYear('next')" class="w-all pt5 hand flex ai-c jc-c">
+              <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                <path fill="#999"
+                  d="M871.424 200.704c14.848 0 29.696 4.608 43.008 14.336 31.744 23.552 37.888 68.608 14.336 99.84l-359.424 479.232c-3.584 5.12-8.704 10.24-14.336 14.336-31.744 24.064-76.288 17.408-100.352-14.336L99.328 320.512c-11.264-12.8-18.432-29.184-18.432-48.128 0-39.936 32.256-71.68 71.68-71.68h718.848z">
+                </path>
+              </svg>
+            </div>
+          </section>
         </div>
       </div>
     </div>
@@ -76,6 +74,7 @@ import formatDate from '@lib/dateFormat';
 export default class datepick extends Vue {
   @Prop({ type: String, default: "yyyy-MM-dd" }) format;
   @Prop({ type: String, default: "small" }) size;
+  @Prop({ type: String, default: "请选择日期" }) placeholder;
   @Prop({ type: String, default: "" }) class;
   @Model('modelValue', { type: [String, Number, Date], default: "" }) value;
   visible = false;
@@ -85,7 +84,7 @@ export default class datepick extends Vue {
   currMonth = new Date().getMonth() + 1;
   week = 0;
   selectYear = new Date().getFullYear();
-  currYear=new Date().getFullYear();
+  currYear = new Date().getFullYear();
   selectMonth = new Date().getMonth() + 1;// 默认从0开始，所以需要加1
   selectDay = 0;
   selectHour = 0;
@@ -117,7 +116,8 @@ export default class datepick extends Vue {
 
   setDateValue(item) {
     if (item.type == 'curr') {
-      this.$emit('update:modelValue', formatDate(item.value, this.format))
+      let value = formatDate(item.value, this.format);
+      this.$emit('update:modelValue', value)
       this.visible = false;
       document.removeEventListener('click', this.setSelectPop)
     }
@@ -161,9 +161,9 @@ export default class datepick extends Vue {
   }
 
   get selectTime() {
-    if(this.value){
+    if (this.value) {
       return formatDate(this.value, 'yyyy-M-d')
-    }else{
+    } else {
       return ""
     }
   }

@@ -1,7 +1,7 @@
 <template>
   <div ref="selects" :class="class" class="_selects">
     <div @click="upSelect" class="rel hand">
-      <input readonly :placeholder="placeholder" v-model="currValue[sLabel]"  :class="{'ipt-small':size=='small','ipt-big':size=='big','is-select':visible}" class="w-all hand ipt" type="text">
+      <input readonly :placeholder="placeholder" v-model="currValue[sLabel]" :class="{'ipt-small':size=='small','ipt-big':size=='big','is-select':visible}" class="w-all hand ipt" type="text">
       <svg class="abs ar5 abst" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7822" width="20" height="20">
         <path d="M346.453333 396.373333L512 561.92l165.546667-165.546667a42.496 42.496 0 1 1 60.16 60.16l-195.84 195.84a42.496 42.496 0 0 1-60.16 0L285.866667 456.533333a42.496 42.496 0 0 1 0-60.16c16.64-16.213333 43.946667-16.64 60.586666 0z" fill="#aaa" p-id="7823"></path>
       </svg>
@@ -44,6 +44,8 @@ export default class selects extends Vue {
   @Model('modelValue', { type: [String, Number, Boolean], default: "" }) value;
   @Prop({ type: Array, default: [] }) data!: any;
   @Ref('selects') selects;
+  // 当一个页面使多次使用时，可根据类型分别给值
+  @Prop({ type: [String, Number, Boolean], default: "1" }) type;
   sLabel = "label";
   sValue = "value"
   visible = false;
@@ -135,8 +137,8 @@ export default class selects extends Vue {
     let curr = item[this.sValue];
     if (this.disList && curr != String(this.value)) {
       if (this.disList.some(v => String(item[this.sValue]) == String(v))) {
-        return ;
-      } 
+        return;
+      }
     }
     this.visible = false;
     this.$emit('update:modelValue', item[this.sValue]);
@@ -146,7 +148,7 @@ export default class selects extends Vue {
 
   @Emit('change')
   handSelect(item) {
-    return { value: item[this.sValue], item, index: this.index }
+    return { value: item[this.sValue], item, index: this.index, type: this.type }
   }
 
   setSelectPop(e) {

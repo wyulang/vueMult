@@ -1,7 +1,7 @@
 <template>
-  <div :class="class" @click="handSelect(item)" v-for="(item, index) in checkArray(data)" :key="index" class="flex hand flex-line ai-c">
-    <svg t="1624104631224" class="icon" :style="{'fill':color[setColor(item)]}" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3126" :width="size" :height="size">
-      <path v-if="!setColor(item)"
+  <div :class="class" @click="handSelect(item)" v-for="(item, index) in path" :key="index" class="flex hand flex-line ai-c">
+    <svg t="1624104631224" class="icon" :style="{'fill':item.select?color[0]:color[1]}" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="3126" :width="size" :height="size">
+      <path v-if="item.select"
         d="M887.466667 1024h-750.933334c-75.093333 0-136.533333-61.44-136.533333-136.533333V136.533333c0-75.093333 61.44-136.533333 136.533333-136.533333h750.933334c75.093333 0 136.533333 61.44 136.533333 136.533333v750.933334c0 75.093333-63.146667 136.533333-136.533333 136.533333z m-134.826667-735.573333L433.493333 628.053333l-153.6-165.546666-71.68 76.8 225.28 242.346666 390.826667-414.72-71.68-78.506666z">
       </path>
       <path v-else
@@ -14,71 +14,85 @@
 
 <script lang='ts'>
 import { Vue, Prop, Emit, Model } from 'vue-property-decorator';
-import { isArray } from '../../lib/lang';
+import { isString, isArray, isObject } from '../../lib/lang';
 export default class checkbox extends Vue {
-  @Prop({ type: [Array, String, Boolean, Number], default: "$$" }) data;
+  @Prop({ type: [Array, String, Boolean, Number], default: false }) data;
   @Prop({ type: [Array, String], default: ['#3699ff', '#888'] }) color;
-  @Prop({ type: [Array, String], default: [] }) icon;
-  @Prop({ type: Number, default: 20 }) size;
+  @Prop({ type: [String, Number], default: 20 }) size;
   @Prop({ type: String, default: "" }) class;
   @Model('modelValue', { type: [Array, String, Number, Boolean], default: false }) value;
+  @Prop({ type: [Array, Object, String], default: ['label', 'value'] }) props;
+
+  get path() {
+    let list: any = [];
+    if (isArray(this.data)) {
+      let curr = this.value || [];
+      list = this.data.map(v => {
+        return { value: v[this.parm.value], label: v[this.parm.label], select: curr.some(s => String(v[this.parm.value]) === String(s)) }
+      })
+    } else {
+      if (typeof this.data === "boolean") {
+        list = [{ value: this.value || false, label: "", select: this.value }]
+      } else {
+        list = [{ value: this.data, label: "", select: String(this.value) === String(this.data) }]
+      }
+    }
+    return list;
+  }
+
 
   @Emit('change')
   handSelect(item) {
-    let val;
+    let curr = [];
+    let val: any = this.value || [];
     if (isArray(this.data)) {
-      let dal = this.value && this.value.map(v => String(v)) || []
-      if (dal.includes(String(item.value))) {
-        val = this.value.filter(v => String(v) != String(item.value));
+      if (val.some(v => String(v) === String(item.value))) {
+        val = val.filter(v => String(v) !== String(item.value));
       } else {
-        this.value.push(item.value);
-        val=this.value;
+        val.push(item.value);
       }
     } else {
-      if (this.data == '$$') {
-        val = !this.value;
+      if (typeof this.data === "boolean") {
+        val = !this.value
       } else {
-        val = String(this.data) == String(this.value)
+        if (String(this.value)) {
+          val = "";
+        } else {
+          val = item.value;
+        }
       }
     }
     this.$emit('update:modelValue', val);
     return val;
   }
 
-  checkArray(data) {
-    return isArray(data) ? data : [data]
-  }
-
-  private setColor(item) {
-    let val: any;
-    let isGroup = false;
-    if (isArray(this.data)) {
-      val = this.value && this.value.map(v => String(v)) || []
-      isGroup = true;
-    }
-    if (isGroup) {
-      let inv = String(item.value);
-      if (val.includes(inv)) {
-        return 0
-      } else {
-        return 1;
-      }
-    } else {
-      if (this.data == '$$') {
-        console.log(this.value)
-        if (this.value) {
-          return 0
-        } else {
-          return 1;
+  get parm() {
+    let label = "label";
+    let value = "value";
+    if (this.props) {
+      if (isString(this.props)) {
+        let obj = this.props.split(',');
+        if (obj[0]) {
+          label = obj[0];
         }
-      } else {
-        if (String(this.data) == String(this.value)) {
-          return 0;
-        } else {
-          return 1
+        if (obj[1]) {
+          value = obj[1]
         }
+      } else if (isArray(this.props)) {
+        if (this.props[0]) {
+          label = this.props[0];
+        }
+        if (this.props[1]) {
+          value = this.props[1]
+        }
+      } else if (isObject(this.props)) {
+        label = this.props.label;
+        value = this.props.value;
       }
     }
+    label = label || 'label';
+    value = value || 'value';
+    return { label, value }
   }
 }
 </script>

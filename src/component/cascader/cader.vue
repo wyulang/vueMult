@@ -36,6 +36,8 @@ export default class pan extends Vue {
   @Prop({ type: String, default: "w-all" }) class;
   @Prop({ type: String, default: "" }) placeholder;
   @Prop({ type: String, default: "small" }) size;
+  // 当一个页面使多次使用时，可根据类型分别给值
+  @Prop({ type: [String, Number, Boolean], default: "1" }) type;
   visible = false;
   currValue: any = [];
   expTiem = 0;
@@ -91,9 +93,9 @@ export default class pan extends Vue {
     let curr = value.map(v => v[this.parm.value]);
     if (this.isOne) {
       curr = value[value.length - 1][this.parm.value];
-      this.changeNodeValue({ value: curr, item: value[value.length - 1] });
+      this.changeNodeValue({ value: curr, item: value[value.length - 1], type: this.type });
     } else {
-      this.changeNodeValue({ value: curr, item: value });
+      this.changeNodeValue({ value: curr, item: value, type: this.type });
     }
     this.$emit('update:modelValue', curr);
   }
