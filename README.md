@@ -1,3 +1,3 @@
-启动 npm run dev nbschool
+启动 npm run dev hcHelp
 
-打包npm run build
+打包npm run build hcHelp
