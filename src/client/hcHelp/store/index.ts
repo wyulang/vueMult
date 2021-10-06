@@ -5,7 +5,12 @@ export default createStore({
     message: "VUE3"
   },
   actions: {
-    
+    getProduct(store, data) {
+      let sql=Object.assign({},data);
+      delete sql.pageNum;
+      delete sql.pageSize;
+      return api.post(`/product/list/${data.pageNum}/${data.pageSize}`, sql)
+    }
   },
   mutations: {
   },

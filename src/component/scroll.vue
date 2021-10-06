@@ -1,8 +1,9 @@
 <template>
-  <section :class="class" :style="scrollStyle" @mouseleave="e=>{visible=false}" @mousemove="e=>{visible=true}" ref="scrollBar" class="scrollbar rel h-all">
-    <section v-if="isRels" ref="wrap" @scroll="netScroll" class="scrollbar-contaniner h-all w-all">
+  <section :style="sHeight" class="scrollbar rel h-all">
+    <main ref="main" @scroll="onScroll" @mouseleave="e=>{visible=false}" @mousemove="e=>{visible=true}" class="h-all scrollbar-contaniner w-all">
       <slot></slot>
-    </section>
+    </main>
+
     <transition name="scrollbar-fade">
       <section ref="instance" v-show="visible" class="scrollbar__bar" @mousedown="clickTrackHandler">
         <div ref="thumb" class="scrollbar__thumb" :style="thumbStyle" @mousedown="clickThumbHandler"></div>
@@ -12,33 +13,113 @@
 </template>
 
 <script lang='ts'>
-import { Vue, Ref, Prop, Emit } from 'vue-property-decorator';
+import { Vue, Prop, Ref, Emit } from 'vue-property-decorator';
 import { off, on } from '../../lib/lang';
 export default class App extends Vue {
+  @Prop({ type: [String, Number], default: 0 }) width;
   @Prop({ type: [String, Number], default: 0 }) maxHeight;
   @Prop({ type: [String, Number], default: 0 }) height;
   @Prop({ type: Boolean, default: false }) auto;
-  @Prop({ type: String, default: "" }) class;
-  @Ref('scrollBar') scroll;
+  mainHeight = 0;
+  bodyHeight = 0;
+  oldHeight = 0;
+  mainWidth = 0;
+  getLevel = 0;
+  visible = true;
+  moveY = 0;
   @Ref('instance') instance;
   @Ref('thumb') thumb;
-  @Ref('wrap') wrap;
-  moveY = 0;
-  moveX = 0;
-  visible = false;
   cursorDown = false;
-  scrollHeight: any = 0;
-  scrollStyle = "";
   barStore = {};
-  isRels = true;
-  cursorLeave;
   onselectstartStore: any = null;
+  cursorLeave;
+  // scrollHeight: any = 0;
   bar = {
     offset: 'offsetHeight', scroll: 'scrollTop', scrollSize: 'scrollHeight',
     size: 'height', key: 'vertical', axis: 'Y', client: 'clientY', direction: 'top',
   }
 
+  mounted() {
+    this.initHeight();
+  }
+
+  // 最大高度
+  get mheight() {
+    let curr: any = this.maxHeight;
+    if (curr && typeof curr == "string") {
+      curr = curr.replace(/[^\d]/g, '');
+    }
+    return curr
+  }
+
+  get heights() {
+    let curr: any = this.height;
+    if (curr && typeof curr == "string") {
+      curr = curr.replace(/[^\d]/g, '') || 0;
+    }
+    return curr
+  }
+
+  //当未设height/maxHeight时，取父级高度，直到取到高度为止
+  getPrentHeight(el) {
+    if (el.parentNode.clientHeight) {
+      return el.parentNode.clientHeight
+    } else {
+      this.getPrentHeight(el.parentNode)
+    }
+  }
+
+  initHeight() {
+    this.bodyHeight = this.$el && this.$el.firstChild.scrollHeight || 0;
+    this.mainWidth = this.$el.firstChild.scrollWidth
+    if (this.width) {
+      this.mainWidth = this.width;
+    }
+    let curr = this.$el && this.$el.firstChild.clientHeight || this.getPrentHeight(this.$el)
+    if (this.mheight && this.mheight > curr) {
+      curr = this.mheight;
+    }
+    if (this.heights) {
+      curr = this.heights;
+    }
+    this.mainHeight = curr;
+  }
+
+  updated() {
+    let curr = this.$el.firstChild.scrollHeight || 0;
+    if (curr > this.bodyHeight&&this.bodyHeight) {
+      this.initHeight();
+    }
+  }
+
+  get sHeight() {
+    return `height:${this.mainHeight}px;`
+  }
+
+  @Emit('scroll')
+  changeScroll(value) {
+    return value
+  }
+
+  @Ref('main') wrap;
+  onScroll(e) {
+    if (this.wrap) {
+      this.moveY = (this.wrap.scrollTop * 100) / this.mainHeight
+      let isBottom = (this.mainHeight + this.wrap.scrollTop) == this.bodyHeight
+      this.changeScroll({
+        scrollTop: this.moveY,
+        isBottom
+      })
+    }
+  }
+
+  get scrollHeight() {
+    let scrollHeight = (this.mainHeight * 100) / this.bodyHeight;
+    return scrollHeight < 100 ? scrollHeight + '%' : '';
+  }
+
   get thumbStyle() {
+    console.log(this.scrollHeight, 'scrollHeight')
     const style = {} as any
     let translate = `translateY(${this.moveY}%)`;
     style.height = this.scrollHeight
@@ -47,52 +128,6 @@ export default class App extends Vue {
     style.webkitTransform = translate
     return style
   }
-
-  update() {
-    let boxHeight = 0;
-    let scrollHeight = 0;
-    let maxheight: any = this.maxHeight;
-    if (this.maxHeight && typeof this.maxHeight == "string") {
-      maxheight = this.maxHeight.replace(/[^\d]/g, '');
-    }
-
-    if (this.height) {
-      boxHeight = this.height
-    } else if (maxheight) {
-      boxHeight = this.wrap.clientHeight <= maxheight ? this.wrap.clientHeight : maxheight;
-    } else {
-      boxHeight = this.scroll.clientHeight;
-    }
-
-    scrollHeight = (boxHeight * 100) / this.wrap.scrollHeight;
-    this.scrollHeight = scrollHeight < 100 ? scrollHeight + '%' : '';
-    this.scrollStyle = `height:${boxHeight}px;`;
-
-    if (this.auto) {
-      this.$nextTick(() => {
-        let half = this.wrap.scrollHeight / 2.5;
-        this.moveY = (half * 100) / this.wrap.clientHeight;
-        this.wrap.scrollTop = this.moveY;
-      })
-    }
-  }
-
-  @Emit('scroll')
-  emitScroll(value) {
-    return value
-  }
-
-  netScroll(e) {
-    if (this.wrap) {
-      this.moveY = (this.wrap.scrollTop * 100) / this.wrap.clientHeight
-      let isBottom = (this.wrap.clientHeight + this.wrap.scrollTop) == this.wrap.scrollHeight
-      this.emitScroll({
-        scrollTop: this.moveY,
-        isBottom
-      })
-    }
-  }
-
 
   clickTrackHandler(e) {
     const offset = Math.abs(e.target.getBoundingClientRect()[this.bar.direction] - e[this.bar.client])
@@ -143,9 +178,6 @@ export default class App extends Vue {
     }
   }
 
-  mounted() {
-    this.update();
-  }
 }
 </script>
 

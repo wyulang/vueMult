@@ -74,7 +74,7 @@ module.exports = {
   publicPath: '',
   outPath: path.resolve(__dirname, '../www'),
   devServer: getIPAdress() || 'localhost',
-  port: '3008',
+  port: '3002',
   isFile: isFile,
   isProd: TARGET == 'build',
   getIPAdress: getIPAdress,

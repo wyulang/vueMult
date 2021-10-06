@@ -141,9 +141,12 @@ class webapi {
       url: url,
       method: method,
       headers: headers,
-      [params]: data,
+      // [params]: data,
       responseType: responseType,
       withCredentials: isSession
+    }
+    if ((method == 'post' && Object.keys(data || {}).length > 0) || (method != "post" && !data)) {
+      soucrs[params] = data;
     }
     return axios.request(soucrs).catch(res => {
       if (!res.response) {
@@ -156,6 +159,7 @@ class webapi {
         this.getMessage(res, 'catch');
       }
     }).then(res => {
+      if (!res) return { code: '500' }
       let result: any = res
       this.getMessage(res, 'then');
       if (result?.data && result?.data.code) {

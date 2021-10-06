@@ -27,14 +27,16 @@ function toDecimal(v, num) {
 
 function getElementLeft(element) {
   var actualLeft = element.offsetLeft;
+  var top = element.offsetTop;
   var current = element.offsetParent;
 
   while (current !== null) {
     actualLeft += current.offsetLeft;
+    top += current.offsetTop;
     current = current.offsetParent;
   }
 
-  return actualLeft;
+  return {left:0,top};
 }
 
 export default function (app) {
@@ -105,9 +107,9 @@ export default function (app) {
 
   app.directive('autotip', {
     updated: (el, binding, vnode) => {
-      let left=getElementLeft(el)
-      let width=el.offsetWidth;
-      console.log(left,width,document.body.clientWidth)
+      let left = getElementLeft(el)
+      let width = el.offsetWidth;
+      console.log(left, width, document.body.clientWidth)
     }
   })
 }

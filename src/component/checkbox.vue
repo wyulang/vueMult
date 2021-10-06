@@ -23,6 +23,10 @@ export default class checkbox extends Vue {
   @Model('modelValue', { type: [Array, String, Number, Boolean], default: false }) value;
   @Prop({ type: [Array, Object, String], default: ['label', 'value'] }) props;
 
+  // 使用方法
+  // <checkboxs v-model="value" :data='[{ label: "是", value: "1" }, { label: "否", value: "2" }]'></checkboxs> value=[1,2]
+  // <checkboxs v-model="value"></checkboxs>  value=true
+
   get path() {
     let list: any = [];
     if (isArray(this.data)) {

@@ -48,7 +48,14 @@ import { Vue } from 'vue-property-decorator';
 import { Swiper, Autoplay, Pagination } from 'swiper';
 Swiper.use([Autoplay, Pagination])
 export default class App extends Vue {
+  $store;
   url: any = "";
+  initData() {
+    this.$store.dispatch('getProduct', { pageNum: 1, pageSize: 10 })
+  }
+  created() {
+    this.initData()
+  }
   mounted() {
     this.$nextTick(() => {
       new Swiper('.swiper-container', {

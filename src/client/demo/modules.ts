@@ -16,7 +16,7 @@ import directive from '@lib/vue.directive';
 
 export default function (app) {
   app.component('dig', dig)
-  app.component('checkbox', checkbox)
+  app.component('checkboxs', checkbox)
   app.component('radio', radio)
   app.component('scroll', scroll)
   app.component('page', page)

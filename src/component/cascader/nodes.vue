@@ -1,7 +1,7 @@
 <template>
   <scrollbar v-if="isFirst" :class="{'bl-d':level}" height="180">
     <div class="flex fd-c cascader wi-120 auto pl10 pr10 auto">
-      <div  :class="{'select-item':item[parm.value]==path[parm.value],'is-check':isCheck}" @click="setNodeValue(item,index)" v-for="(item,index) in list" class="flex ai-c cascader-item hand jc-b h-35">
+      <div :class="{'select-item':item[parm.value]==path[parm.value],'is-check':isCheck}" @click="setNodeValue(item,index)" v-for="(item,index) in list" class="flex ai-c cascader-item hand jc-b h-35">
         <span class="cascader-titles nowrap">{{item[parm.label]}}</span>
         <div v-if="item.len" class="flex w-16">
           <span class="cascader-arrow mt9"></span>
@@ -10,7 +10,7 @@
       </div>
     </div>
   </scrollbar>
-  <cascader-node :times="times" v-if="path.len>0&&isRefresh" :isCheck="isCheck" :parm="parm" :sValue="sValue" v-model="value" @setValue="changeNodeValue" :level="currLevel" :data="path.children"></cascader-node>
+  <cascader-node :times="times" v-if="path.len>0&&isRefresh" :isCheck="isCheck" :parm="parm" :sValue="sValue" v-model="value" @setValue="changeNodeValue" @setPosition="setPosition" :level="currLevel" :data="path.children"></cascader-node>
 </template>
 
 <script lang='ts'>
@@ -25,7 +25,7 @@ import scrollbar from '../scroll.vue';
 export default class nodes extends Vue {
   @Prop({ type: Function }) lazy;
   @Prop({ type: Number, default: false }) times;
-  @Prop({ type: [Number,String], default: 0 }) look;
+  @Prop({ type: [Number, String], default: 0 }) look;
   @Prop({ type: Object, default: false }) parm;
   @Prop({ type: Boolean, default: false }) isCheck;
   @Prop({ type: Number, default: 0 }) level;
@@ -36,8 +36,8 @@ export default class nodes extends Vue {
   currValue: any = {}
   isFirst = true;
 
-  get currLevel(){
-    return this.level+1
+  get currLevel() {
+    return this.level + 1
   }
 
   @Watch('times')
@@ -50,7 +50,14 @@ export default class nodes extends Vue {
     }
   }
 
-  mounted(){
+  mounted() {
+    this.setPosition(this.$el.parentNode.clientWidth);
+    // console.log(this.sValue)
+  }
+
+  @Emit('setPosition')
+  setPosition(value) {
+    return value
   }
 
   get path() {
@@ -65,21 +72,22 @@ export default class nodes extends Vue {
       } else {
         return {}
       }
-    } else {
+    }
+    else {
       return {}
     }
   }
 
-  setNodeValue(data, index,check=false) {
+  setNodeValue(data, index, check = false) {
     // if (this.value[this.level] && this.value[this.level][this.parm.value] == data[this.parm.value]&&!check) {
     //   return
     // }
-    this.currValue=data;
+    this.currValue = data;
     let val: any = [].concat(this.value || []);
     val[this.level] = data;
     let sel = [].concat(val).slice(0, this.level + 1);
     this.$emit('update:modelValue', sel);
-    if(check){
+    if (check) {
       this.changeNodeValue(sel);
       return;
     }
@@ -114,6 +122,8 @@ export default class nodes extends Vue {
       this.isRefresh = true;
     })
   }
+
+
 
   get list() {
     if (this.data.length) {

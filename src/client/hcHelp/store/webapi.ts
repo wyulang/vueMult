@@ -22,11 +22,11 @@ class webapi extends baseApi {
   }
 
   envUrl = {
-    me: 'http://172.16.20.33:8081',
+    me: 'http://www.loveyunta.com:9090',
     // me: 'http://172.16.10.8:8081',
-    inte: 'http://10.35.65.214:8081',
+    inte: 'http://www.loveyunta.com:9090',
     // inte: 'https://api.zy.86edu.net',
-    prod: 'http://10.32.30.174:8089',
+    prod: 'http://www.loveyunta.com:9090',
   }
 
   getDomainApi() {
@@ -39,25 +39,8 @@ class webapi extends baseApi {
 
   //请求体BUG提示
   getMessage(err, type) {
-    if (err?.code) {
-      if (err.code == 404) {
-        msg({ message: err.data, type: "error" })
-        window.location.href = "#/"
-        return
-      }
-      else if (err.code == 400) {
-        msg({ message: '未找到接口：' + err.data.path, type: "error" });
-        return;
-      }
-    }
     if (type == 'then') {
-      if (!err?.data) {
-        msg({ message: 'CORS跨域出错或连接失败', type: "error" })
-      } else if (err.data && err.data.code == 5001) {
-        msg({ message: err.data.tip, type: "error" })
-        window.location.href = "#/";
-      }
-      else if (err.data && err.data.code != 2000) {
+       if (err.data && err.data.code != 200) {
         msg({ message: err.data.tip, type: "error" })
       }
     } else {

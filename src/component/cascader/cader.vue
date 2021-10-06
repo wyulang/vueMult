@@ -7,9 +7,11 @@
       </svg>
     </div>
 
-    <div v-if="data&&data.length" @click.stop v-show="visible" class="w-0 h-0 zi-8888 rel">
-      <div class="flex-line ra-3 sha-card bc-fff b-e at5 mt3 al0 pt5 pb5 ar0">
-        <nodes @setValue="setValue" :look="look" :parm="parm" :isCheck="check" :times="expTiem" :lazy="lazy" :sValue="currValue" v-model="selectValue" :data="data"></nodes>
+    <div v-if="data&&data.length" @click.stop v-show="visible" class="h-1 zi-8888 rel">
+      <div :style="currPosit" class="abs al0 h-1 w-all at0">
+        <div class="flex-line ra-3 sha-card bc-fff b-e mt2 pt5 pb5">
+          <nodes @setValue="setValue" @setPosition="setPosition" :look="look" :parm="parm" :isCheck="check" :times="expTiem" :lazy="lazy" :sValue="currValue" v-model="selectValue" :data="data"></nodes>
+        </div>
       </div>
     </div>
   </div>
@@ -43,6 +45,8 @@ export default class pan extends Vue {
   expTiem = 0;
   selectValue: any = []
   gvalue = "";
+  digWidth = 0;
+  digHeight = 0;
 
   get path() {
     let isNext = true;
@@ -98,6 +102,48 @@ export default class pan extends Vue {
       this.changeNodeValue({ value: curr, item: value, type: this.type });
     }
     this.$emit('update:modelValue', curr);
+  }
+
+  setPosition(v) {
+    this.digWidth = v;
+  }
+
+  mounted() {
+    this.digHeight = document.body.scrollHeight;
+  }
+
+  getElementLeft() {
+    if (!this.$refs.cascaderInput) return { left: 0, top: 0 };
+    let element: any = this.$refs.cascaderInput;
+    var left = element.offsetLeft;
+    var top = element.offsetTop;
+    var current = element.offsetParent;
+
+    while (current !== null) {
+      left += current.offsetLeft;
+      top += current.offsetTop;
+      current = current.offsetParent;
+    }
+
+    return { left, top };
+  }
+
+  get currPosit() {
+    let top = 0;
+    if (this.visible) {
+      top = this.$el.offsetTop + 214
+    }
+    let height = this.digHeight;
+    let width = document.documentElement.clientWidth;
+    let left = this.getElementLeft().left + this.digWidth;
+    let style = "";
+    if (left > width) {
+      style = `left:-${left - width + 2}px;`;
+    }
+    if (top > height) {
+      style += `top:-228px;`
+    }
+    return style;
   }
 
   @Emit('change')
