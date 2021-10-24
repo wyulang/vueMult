@@ -41,10 +41,13 @@ class webapi extends baseApi {
   getMessage(err, type) {
     if (type == 'then') {
        if (err.data && err.data.code != 200) {
-        msg({ message: err.data.tip, type: "error" })
+        msg({ message: err.data.error, type: "error" });
+        return;
       }
+      return;
     } else {
-      msg({ message: err.data, type: "error" })
+      msg({ message: err.data.error, type: "error" });
+      return;
     }
   }
 

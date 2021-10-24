@@ -7,7 +7,7 @@
       </svg>
     </div>
     <transition v-if="isRefresh">
-      <div style="height:0;" @click.stop v-if="visible" class="w-all zi-8888 rel">
+      <div style="height:0;" @click.stop v-show="visible" class="w-all zi-8888 rel">
         <div class="h-3 w-all"></div>
         <div class="_selects_dropdown bc-fff al0 pt5 pb5">
           <scrollbar maxHeight="220" @scroll="scroll">

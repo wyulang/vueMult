@@ -37,11 +37,11 @@
       <div class="fs-22 centers">登录</div>
       <div class="rel mt30 flex bc-f6 ra-29 h-57 ai-c">
         <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
-        <input @blur="btnCheckVip" v-model="user.phone" placeholder="请输入手机号码" class="h-57 pp10 fs-16 bc-t" type="text">
+        <input @blur="btnCheckVip" v-model="user.username" placeholder="请输入手机号码" class="h-57 pp10 fs-16 bc-t" type="text">
       </div>
       <div class="rel mt30 flex bc-f6 ra-29 h-57 ai-c">
         <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
-        <input @blur="btnCheckVip" v-model="user.phone" placeholder="请输入手机号码" class="h-57 pp10 fs-16 bc-t" type="text">
+        <input @blur="btnCheckVip" v-model="user.password" placeholder="请输入手机号码" class="h-57 pp10 fs-16 bc-t" type="password">
       </div>
 
       <div @click="goLogin" style="box-shadow: 0 8px 20px rgba(137,191,234,.64);" class="mt25 bc-primary fc-fff hand fs-26 flex ai-c jc-c h-63 ra-32">
@@ -59,18 +59,18 @@
       <div class="fs-22 centers">注册</div>
       <div class="rel mt30 flex bc-f6 ra-29 h-57 ai-c">
         <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
-        <input v-model="user.phone" placeholder="请输入您的姓名" class="h-57 pp10 fs-16 bc-t" type="text">
+        <input v-model="info.username" placeholder="请输入您的姓名" class="h-57 pp10 fs-16 bc-t" type="text">
       </div>
       <div class="rel mt30 flex bc-f6 ra-29 h-57 ai-c">
         <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
-        <input v-model="user.phone" placeholder="请输入手机号码" class="h-57 pp10 fs-16 bc-t" type="text">
+        <input v-model="info.phone" placeholder="请输入手机号码" class="h-57 pp10 fs-16 bc-t" type="text">
       </div>
       <div class="rel mt30 flex bc-f6 ra-29 h-57 ai-c">
         <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
-        <input v-model="user.phone" placeholder="请输入您的密码" class="h-57 pp10 fs-16 bc-t" type="text">
+        <input v-model="info.password" placeholder="请输入您的密码" class="h-57 pp10 fs-16 bc-t" type="password">
       </div>
 
-      <div @click="goLogin" style="box-shadow: 0 8px 20px rgba(137,191,234,.64);" class="mt25 bc-primary fc-fff hand fs-26 flex ai-c jc-c h-63 ra-32">
+      <div @click="toRegedit" style="box-shadow: 0 8px 20px rgba(137,191,234,.64);" class="mt25 bc-primary fc-fff hand fs-26 flex ai-c jc-c h-63 ra-32">
         注册
       </div>
       <div class="h-10"></div>
@@ -81,13 +81,59 @@
 <script lang='ts'>
 import { Vue } from 'vue-property-decorator';
 export default class App extends Vue {
-  user: any = {}
+  $store;$msg;
+  user: any = {
+    username:"",
+    password:""
+  }
+  info: any = {
+    username:"",
+    password:"",
+    phone:""
+  }
   isLogin = false;
   isRegedit=false;
 
+  toRegedit(){
+      if(!this.info.username){
+      this.$msg.error('登录名不为空！');
+      return;
+    }
+      if(!/^1[3456789]\d{9}$/.test(this.info.phone)){
+      this.$msg.error('手机号不正确');
+      return;
+    }
+    if(!this.info.password){
+      this.$msg.error('密码不为空！');
+      return;
+    }
+    this.$store.dispatch('pcRegedit',this.info).then(res=>{
+      if(res.code==200){
+        this.isRegedit=false;
+        this.user.username=this.info.username;
+        this.user.password=this.info.password;
+        this.goLogin()
+      }
+    })
+  }
+
   goLogin(){
-    this.$router.push('/user/order');
-    this.isLogin=false;
+    // 
+    if(!this.user.username){
+      this.$msg.error('登录名不为空！');
+      return;
+    }
+    if(!this.user.password){
+      this.$msg.error('密码不为空！');
+      return;
+    }
+    this.$store.dispatch('login',this.user).then(res=>{
+      if(res.code==200){
+        this.isLogin=false;
+        this.$router.push('/user/order');
+      }
+    })
+    
   }
 }
 </script>

@@ -31,7 +31,7 @@ const routes = [
         },
       },
       {
-        path: '/product/detail',
+        path: '/product/detail/:code',
         component: () => import(/* webpackChunkName: "introduce" */ './page/home/detail.vue'),
         name: 'home.detail',
         mate: {

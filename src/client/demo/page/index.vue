@@ -1,8 +1,6 @@
 <template>
   <div @click="total=total+10" class="flex hv-all">
-    <scroll @scroll="onScroll">
-      <div v-for="item in total" class="flex w-all pp10">HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH</div>
-    </scroll>
+    <selects class="w-150" v-model="value" :data='list'></selects>
   </div>
 </template>
 
@@ -11,9 +9,9 @@ import { Vue } from 'vue-property-decorator';
 // import citys from '@lib/city';
 export default class App extends Vue {
   // list=citys;
-  list = "";
+  list = [{value:"1",label:"pppppppp"},{value:"2",label:"DDDddd"}];
   total = 10;
-  value = true
+  value = ""
 
   onScroll(data) {
     console.log(data)

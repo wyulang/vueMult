@@ -49,7 +49,7 @@ export default class App extends Vue {
     if (curr && typeof curr == "string") {
       curr = curr.replace(/[^\d]/g, '');
     }
-    return curr
+    return Number(curr)
   }
 
   get heights() {
@@ -70,14 +70,18 @@ export default class App extends Vue {
   }
 
   initHeight() {
-    this.bodyHeight = this.$el && this.$el.firstChild.scrollHeight || 0;
-    this.mainWidth = this.$el.firstChild.scrollWidth
-    if (this.width) {
-      this.mainWidth = this.width;
+    let curr = 0;
+    if (this.$el) {
+      this.bodyHeight = this.$el.firstElementChild.scrollHeight;
+      curr = this.$el.firstChild.clientHeight || this.getPrentHeight(this.$el)
     }
-    let curr = this.$el && this.$el.firstChild.clientHeight || this.getPrentHeight(this.$el)
-    if (this.mheight && this.mheight > curr) {
-      curr = this.mheight;
+    if (this.mheight) {
+      let child = this.$el.firstElementChild.scrollHeight;
+      if (child < this.mheight) {
+        curr = child;
+      } else {
+        curr = this.mheight;
+      }
     }
     if (this.heights) {
       curr = this.heights;
@@ -87,7 +91,7 @@ export default class App extends Vue {
 
   updated() {
     let curr = this.$el.firstChild.scrollHeight || 0;
-    if (curr > this.bodyHeight&&this.bodyHeight) {
+    if (curr > this.bodyHeight && this.bodyHeight) {
       this.initHeight();
     }
   }

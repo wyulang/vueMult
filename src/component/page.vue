@@ -1,5 +1,5 @@
 <template>
-  <div class="flex fb ai-c">
+  <div v-if="count>1" class="flex fb ai-c">
     <!-- 上一页 -->
     <div @click="onPage('prev')" class="w-30 hand h-30 flex ai-c jc-c bc-f4 ra-4"><svg viewBox="0 0 1024 1024" style="fill:#666" xmlns="http://www.w3.org/2000/svg" class="w-13 h-13">
         <path

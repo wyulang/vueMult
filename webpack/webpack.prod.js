@@ -83,9 +83,9 @@ const webpackProdConfig = {
           process.stderr.write(chalk.blueBright.bold(` build success use time ${res} \n`))
         }
       }
-    ),
+    )
     // 开启打包过程
-    new BundleAnalyzerPlugin()
+    // new BundleAnalyzerPlugin()
   ]
 }
 
