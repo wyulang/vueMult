@@ -182,7 +182,9 @@
 
   &:hover,
   &:focus {
-    background: #ededed;
+    background: #fff;
+    border: 1px solid #3a8ee6;
+    color: #3a8ee6;
     background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#dcdcdc));
     background: -moz-linear-gradient(top, #fff, #dcdcdc);
   }
@@ -199,4 +201,11 @@
     background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#fff));
     background: -moz-linear-gradient(top, #ededed, #fff);
   }
+}
+
+button:disabled{
+  background: #82848a;
+  border-color: #82848a;
+  color: #fff;
+  cursor: not-allowed;
 }

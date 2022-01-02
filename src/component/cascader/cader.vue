@@ -1,115 +1,106 @@
 <template>
-  <div :class="class">
-    <div @click="upCascader" class="rel zi-100 w-all hand">
-      <input readonly :disabled="disabled" ref="cascaderInput" :placeholder="placeholder" v-model="path" :class="{'ipt-small':size=='small','ipt-big':size=='big','is-select':visible}" class="w-all hand ipt" type="text">
-      <svg class="abs ar5 abst" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-        <path d="M346.453333 396.373333L512 561.92l165.546667-165.546667a42.496 42.496 0 1 1 60.16 60.16l-195.84 195.84a42.496 42.496 0 0 1-60.16 0L285.866667 456.533333a42.496 42.496 0 0 1 0-60.16c16.64-16.213333 43.946667-16.64 60.586666 0z" fill="#aaa" p-id="7823"></path>
+  <div :class="class" :style="{'height':`${options.inputHeight}px`}" class="_cascader rel">
+    <div @click="onSelect" @mouseover="isHover=true" @mouseleave="isHover=false" class="rel w-all">
+      <input ref="cascaderInput" :placeholder="placeholder" @focus="isHover=true" v-model="path" @blur="isHover=false" :disabled="disabled" :class="inputClass" class="w-all hand ipt" type="text">
+      <svg style="transition: all 0.15s;" :class="{'arrow':visible}" class="abs ar5 drop abst w-22 h-22" viewBox="0 0 1024 1024">
+        <path d="M346.453333 396.373333L512 561.92l165.546667-165.546667a42.496 42.496 0 1 1 60.16 60.16l-195.84 195.84a42.496 42.496 0 0 1-60.16 0L285.866667 456.533333a42.496 42.496 0 0 1 0-60.16c16.64-16.213333 43.946667-16.64 60.586666 0z" fill="#aaa"></path>
+      </svg>
+      <svg style="fill:#ccc" v-if="isHover&&clear&&value" @click.stop="changeClose" class="abs ar23 iconfix hand close abst" viewBox="0 0 1024 1024" width="16" height="16">
+        <path
+          d="M512 102.4a409.6 409.6 0 1 0 409.6 409.6 409.6 409.6 0 0 0-409.6-409.6z m181.248 518.144a51.2 51.2 0 0 1-72.704 72.704L512 584.192l-108.544 109.056a51.2 51.2 0 0 1-72.704-72.704L439.808 512 330.752 403.456a51.2 51.2 0 0 1 72.704-72.704L512 439.808l108.544-109.056a51.2 51.2 0 0 1 72.704 72.704L584.192 512z">
+        </path>
       </svg>
     </div>
 
-    <div v-if="data&&data.length" @click.stop v-show="visible" class="h-1 zi-8888 rel">
-      <div :style="currPosit" class="abs al0 h-1 w-all at0">
-        <div class="flex-line ra-3 sha-card bc-fff b-e mt2 pt5 pb5">
-          <nodes @setValue="setValue" @setPosition="setPosition" :look="look" :parm="parm" :isCheck="check" :times="expTiem" :lazy="lazy" :sValue="currValue" v-model="selectValue" :data="data"></nodes>
-        </div>
-      </div>
+    <div :style="currPosit" ref="nodes" class="zi-8888 bc-fff _dropdown pt5 pb5 ra5 flex-line abs al0 at5" @click.stop v-show="visible">
+      <node @onNodeSelect="onNodeSelect" :check="check" :lazy="lazy" @setPosition="setPosition" v-model="value" :parm="parm" :expan="expan" :nodeValue="nodeValue" :data="nodeSelect"></node>
     </div>
   </div>
 </template>
 
 <script lang='ts'>
-import { Vue, Prop, Model, Options, Emit } from 'vue-property-decorator';
+import { Vue, Prop, Model, Options, Emit, Ref } from 'vue-property-decorator';
 import { isString, isArray, isObject } from '../../../lib/lang';
-import nodes from './nodes.vue';
+import node from './nodes.vue';
 @Options({
   components: {
-    nodes
+    node
   }
 })
-export default class pan extends Vue {
+export default class App extends Vue {
+  // 懒加载 return []
   @Prop({ type: Function }) lazy;
-  @Prop({ type: Boolean, default: false }) isOne;
-  @Prop({ type: [Number, String], default: 0 }) look;
+  // 输入框中是否显示选中值的完整路径
+  @Prop({ type: Boolean, default: false }) only;
+  // 是否显示单选框
   @Prop({ type: Boolean, default: false }) check;
+  // 是否清空
+  @Prop({ type: Boolean, default: false }) clear;
+  // 是否禁用
   @Prop({ type: [String, Number, Boolean], default: false }) disabled;
+  // 数据来原Array
   @Prop({ type: Array, default: [] }) data!: any;
+  // 配置选项
   @Prop({ type: [Array, Object, String], default: ['label', 'value'] }) props;
-  @Model('modelValue', { type: [String, Number, Boolean, Object], default: "" }) value;
+  //当前已选中值最终值['01','0102','010203']
+  @Model('modelValue', { default: "" }) value: any;
+  // 外部样式
   @Prop({ type: String, default: "w-all" }) class;
+  // Input样式
+  @Prop({ type: String, default: "w-all" }) className;
+  // 输入框占位文本
   @Prop({ type: String, default: "" }) placeholder;
+  // 尺寸 small/big
   @Prop({ type: String, default: "small" }) size;
   // 当一个页面使多次使用时，可根据类型分别给值
   @Prop({ type: [String, Number, Boolean], default: "1" }) type;
+  // 展开次数显示次数
+  expan = 0;
+  isHover = false;
   visible = false;
-  currValue: any = [];
-  expTiem = 0;
-  selectValue: any = []
-  gvalue = "";
+
+  // 取值类型 1:初始化，2:正在点击取值，3:最终选中值
+  loadType: any = 1;
+
+  // 当前正在点击值
+  nodeSelect: any = [];
+  nodeValue: any = [];
+  // 最终值
+  valueSelect: any = [];
   digWidth = 0;
-  digHeight = 0;
 
-  get path() {
-    let isNext = true;
-    if (this.value == this.gvalue && (!this.value && !this.gvalue)) {
-      isNext = false;
-    }
-    if (this.value && this.data.length) {
-      if (isNext) {
-        if (this.isOne) {
-          this.getOneValue(this.data)
-          this.isEnd = false;
-        } else {
-          this.getValue(this.data)
-        }
-      }
-      this.selectValue = this.currValue;
-      if (this.isOne) {
-        this.gvalue = this.currValue && this.currValue.length && this.currValue[this.currValue.length - 1][this.parm.value] || ""
-        return this.currValue && this.currValue.length && this.currValue[this.currValue.length - 1][this.parm.label] || ""
-      } else {
-        if (this.currValue && this.currValue.length > 0) {
-          this.gvalue = this.currValue.map((item => item[this.parm.value]));
-          return this.currValue.map(item => item[this.parm.label]).join('/');
-        }
-      }
-    } else {
-      this.currValue = []
-      this.selectValue = []
-      return ""
-    }
-  }
-
-  upCascader() {
-    if (this.disabled) return;
-    if (this.visible) {
-      this.visible = false;
-    } else {
-      this.visible = !this.visible;
-    }
-    this.expTiem = this.expTiem + 1;
-    document.addEventListener("click", this.setSelectPop);
-  }
-
-  setValue(value) {
-    this.visible = false;
-    this.currValue = value;
-    this.gvalue = "";
-    let curr = value.map(v => v[this.parm.value]);
-    if (this.isOne) {
-      curr = value[value.length - 1][this.parm.value];
-      this.changeNodeValue({ value: curr, item: value[value.length - 1], type: this.type });
-    } else {
-      this.changeNodeValue({ value: curr, item: value, type: this.type });
-    }
-    this.$emit('update:modelValue', curr);
+  options: any = {
+    inputHeight: 0,
+    digHeight: 0,
   }
 
   setPosition(v) {
     this.digWidth = v;
   }
 
-  mounted() {
-    this.digHeight = document.body.scrollHeight;
+  onSelect() {
+    if (this.disabled) return;
+    if (this.visible) {
+      this.visible = false;
+    } else {
+      this.visible = !this.visible;
+    }
+    this.expan = this.expan + 1;
+    document.addEventListener("click", this.setSelectPop);
+  }
+
+  setSelectPop(e) {
+    if (!this.$el.contains(e.target)) {
+      this.visible = false;
+      document.removeEventListener('click', this.setSelectPop)
+    }
+  }
+
+  initSelect() {
+    let inputs: any = this.$refs.cascaderInput;
+    this.options.inputHeight = inputs.offsetHeight;
+
+    this.options.digHeight = document.body.scrollHeight;
   }
 
   getElementLeft() {
@@ -124,7 +115,6 @@ export default class pan extends Vue {
       top += current.offsetTop;
       current = current.offsetParent;
     }
-
     return { left, top };
   }
 
@@ -133,59 +123,177 @@ export default class pan extends Vue {
     if (this.visible) {
       top = this.$el.offsetTop + 214
     }
-    let height = this.digHeight;
+    let height = this.options.digHeight;
     let width = document.documentElement.clientWidth;
+
     let left = this.getElementLeft().left + this.digWidth;
+
     let style = "";
     if (left > width) {
-      style = `left:-${left - width + 2}px;`;
+      style = `left:-${left - width + 3}px;`;
     }
     if (top > height) {
       style += `top:-228px;`
+    } else {
+      style += `top:${this.options.inputHeight + 4}px`
     }
     return style;
   }
 
-  @Emit('change')
-  changeNodeValue(data) {
-    return data
+  mounted() {
+    this.initSelect();
   }
 
-  getValue(list, len = 0) {
-    if (len < this.value.length) {
+  updated() {
+    this.initSelect()
+  }
+
+  get inputClass() {
+    let mr = "mrdown";
+    if (this.clear && this.isHover && this.value) {
+      mr = "mrclose"
+    }
+    return {
+      [mr]: mr,
+      'ipt-small': this.size == 'small',
+      'ipt-big': this.size == 'big',
+      [this.className]: this.className
+    }
+  }
+
+  get path() {
+    if (!this.value.toString()) {
+      if (this.expan == 0) {
+        this.nodeSelect = [{
+          label: "",
+          value: "",
+          list: this.data
+        }];
+      }
+      return ""
+    }
+    if (this.loadType == 1) {
+      if (this.only) {
+        this.getOnlyPath(this.data)
+      } else {
+        this.getFullPath(this.data)
+      }
+    }
+    this.nodeValue = this.nodeSelect.map(v => v[this.parm.value]);
+    if (this.only) {
+      let curr = this.valueSelect[this.valueSelect.length - 1];
+      return curr && curr[this.parm.label] || ""
+    } else {
+      return this.valueSelect.map(v => v[this.parm.label]).join('/')
+    }
+  }
+
+  onNodeSelect(data) {
+    this.expan++;
+    let children = data.children;
+    let currData = Object.assign({}, data)
+    delete currData.isNode
+    delete currData.level
+    delete currData.children;
+    delete currData.lazy;
+    let curr = this.nodeSelect[data.level];
+    this.nodeSelect[data.level] = Object.assign(curr, currData);
+    if (data.isNode) {
+      this.loadType = 3;
+      let sel: any = [].concat(this.nodeSelect).slice(0, data.level + 1);
+      this.nodeSelect = JSON.parse(JSON.stringify(sel));
+      this.valueSelect = JSON.parse(JSON.stringify(sel.map(v => { delete v.list; return v })));
+      if (this.only) {
+        let values = this.valueSelect[this.valueSelect.length - 1][this.parm.value];
+        this.$emit('update:modelValue', values);
+        this.changeNodeValue({ value: values, item: this.valueSelect[this.valueSelect.length - 1], type: this.type })
+      } else {
+        let values = this.valueSelect.map(v => v[this.parm.value]);
+        this.$emit('update:modelValue', values);
+        this.changeNodeValue({ value: values, item: this.valueSelect, type: this.type });
+      }
+    } else {
+      this.loadType = 2;
+      if (data.len) {
+        if (!this.nodeSelect[data.level + 1]) {
+          this.nodeSelect[data.level + 1] = {};
+        }
+        this.nodeSelect[data.level + 1].list = children;
+      }
+      // 异步加载修改上级数据
+      if (children.length && data.lazy) {
+        let modify = this.nodeSelect[data.level].list.find(v => v[this.parm.value] == data[this.parm.value]);
+        modify.children = children;
+        modify.len = children.length;
+        modify = null;
+      }
+      let sel: any = this.nodeSelect.slice(0, data.level + 2);
+      this.nodeSelect = sel;
+      sel = null;
+      children = null;
+      currData = null;
+    }
+  }
+
+  // 完整路径值
+  getFullPath(list: any = [], len = 0) {
+    if (list.length && len < this.value.length) {
       let curr = list.find(v => v[this.parm.value] == this.value[len]);
-      let dal: any = null;
+      let child = [];
+      let dal: any = {};
       if (curr) {
         dal = Object.assign({}, curr);
-        dal.len = curr[this.parm.child] && curr[this.parm.child].length || 0;
+        child = curr[this.parm.child];
+        dal.len = child && child.length || 0;
+        dal.list = list;
+        delete dal[this.parm.child]
       }
-      this.currValue[len] = dal;
+      this.nodeSelect[len] = Object.assign({}, dal);
+      delete dal.list;
+      this.valueSelect[len] = Object.assign({}, dal);
       if (dal.len) {
-        this.getValue(this.currValue[len][this.parm.child], len + 1)
+        this.getFullPath(child, len + 1)
       }
     }
   }
 
-  oneValue: any = [];
+  // 单路径值
+  onlyValue: any = [];
   isEnd = false;
-  getOneValue(list: any = [], len = 0) {
+  getOnlyPath(list: any = [], len = 0) {
     if (this.isEnd) return;
     let l = list.length;
     for (let i = 0; i < l; i++) {
       let item = list[i];
-      item.len = item.children && item.children.length;
-      this.oneValue[len] = item;
+      item.len = item[this.parm.child] && item[this.parm.child].length || 0;
+      item.list = list
+      let curr = Object.assign({}, item);
+      delete curr[this.parm.child]
+      delete item.list
+      this.onlyValue[len] = curr;
+      curr = null;
       if (String(item[this.parm.value]) === String(this.value)) {
-        this.currValue = [].concat(this.oneValue.slice(0, len + 1));
-        this.oneValue = [];
+        let currList = this.onlyValue.slice(0, len + 1);
+        this.nodeSelect = JSON.parse(JSON.stringify([].concat(currList)));
+        this.valueSelect = JSON.parse(JSON.stringify([].concat(currList.map(v => { delete v.list; return v }))));
+        this.onlyValue = [];
         this.isEnd = true;
-        break;
       } else {
         if (item[this.parm.child] && item[this.parm.child].length) {
-          this.getOneValue(item[this.parm.child], len + 1)
+          this.getOnlyPath(item[this.parm.child], len + 1)
         }
       }
     }
+  }
+
+  @Emit('change')
+  changeNodeValue(data) {
+    this.visible = false;
+    return data
+  }
+
+  changeClose() {
+    this.isHover = false;
   }
 
   get parm() {
@@ -223,18 +331,33 @@ export default class pan extends Vue {
     return { label, value, child }
   }
 
-  setSelectPop(e) {
-    if (!this.$el.contains(e.target)) {
-      this.visible = false;
-      document.removeEventListener('click', this.setSelectPop)
-    }
-  }
 }
 </script>
 
 <style lang='less'>
-.cascader {
+._cascader {
+  ._dropdown {
+    border-radius: 4px;
+    box-shadow: 0 1px 10px rgba(109, 109, 109, 0.2);
+  }
+  .arrow {
+    transform: rotate(-180deg) translateY(50%);
+  }
+  .iconfix {
+    &:hover {
+      fill: #409eff !important;
+    }
+  }
+  .mrdown {
+    padding-right: 23px !important;
+  }
+  .mrclose {
+    padding-right: 40px !important;
+  }
   .cascader-item {
+    &:hover {
+      background-color: #f5f7fa;
+    }
     .cascader-arrow {
       width: 8px;
       height: 8px;
@@ -251,6 +374,9 @@ export default class pan extends Vue {
       }
       .checks {
         display: inline-block;
+        &:hover {
+          border: #409eff 1.5px solid !important;
+        }
       }
     }
   }

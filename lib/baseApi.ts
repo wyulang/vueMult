@@ -19,7 +19,7 @@ class webapi {
   }
 
   // 设置全局属性
-  setData() {
+  setData(data: any = null) {
     return {}
   }
 
@@ -121,7 +121,7 @@ class webapi {
     } else {
       isSession = this.setWithCredentials();
     }
-    let gData = this.setData();
+    let gData = this.setData(data);
     data = Object.assign(gData, data);
     if (headers["Content-Type"].includes('urlencoded') && !['get'].includes(method)) {
       if (!isQs) {
@@ -141,16 +141,18 @@ class webapi {
       url: url,
       method: method,
       headers: headers,
-      // [params]: data,
+      [params]: data,
       responseType: responseType,
       withCredentials: isSession
     }
-    if ((method == 'post' && Object.keys(data || {}).length > 0) || (method != "post" && !data)) {
-      soucrs[params] = data;
-    }
+    // debugger;
+    // if (Object.keys(data || {}).length > 0) {
+    //   soucrs[params] = data;
+    // }
     return axios.request(soucrs).catch(res => {
       if (!res.response) {
         this.getMessage({ code: 404, data: "服务异常 " + res.message }, 'catch');
+        return { code: 404 }
       }
       else if (res.response.status != 200) {
         this.getMessage({ code: res.response.status, data: res.response.data }, 'catch');
@@ -159,8 +161,10 @@ class webapi {
         this.getMessage(res, 'catch');
       }
     }).then(res => {
-      if (!res) return { code: '500' }
       let result: any = res
+      if (result.request && result.request.responseType && result.request.responseType == "blob") {
+        return res
+      }
       this.getMessage(res, 'then');
       if (result?.data && result?.data.code) {
         return result.data;

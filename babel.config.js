@@ -1,7 +1,13 @@
 module.exports = {
-  plugins: [
-    "@babel/plugin-transform-typescript",
-    ["@babel/plugin-proposal-decorators", { "legacy": true }],
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "useBuiltIns": "usage",
+        "corejs": "3",
+      }
+    ]
   ],
-  compact:false
+  "plugins": ["@babel/plugin-transform-runtime"],
+  compact: false
 }

@@ -51,6 +51,15 @@ import menus from './user.vue';
   }
 })
 export default class App extends Vue {
+  created() {
+    this.$store.dispatch('getCurrentUser').then(res => {
+      if (res.code == 200) {
+        this.info = res.data;
+        var tem 
+        this.info.specs = res.data.productSpecList
+      }
+    })
+  }
   $store;$msg;
   info: any = {
     "address": "",

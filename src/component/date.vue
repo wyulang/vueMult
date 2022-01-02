@@ -1,7 +1,12 @@
 <template>
-  <div :class="class" class="flex rel w-all">
-    <input @click="inputSelect" :placeholder="placeholder" readonly v-model="currValue" ref="dateInput" :class="{'ipt-small':size=='small','ipt-big':size=='big'}" class="ipt w-all" type="text">
-    <div @click.stop :class="{'at35':size=='small','at42':size=='big'}" v-if="visible" class="abs zi-8888 al0">
+  <div :class="class" @mouseleave="btnMouse('leave')" @mousemove="btnMouse('move')" class="flex rel w-all">
+    <input @click="inputSelect" :placeholder="placeholder" readonly v-model="currValue" ref="dateInput" :class="{'ipt-small':size=='small','ipt-big':size=='big','h-all w-all':size=='auto'}" class="ipt w-all" type="text">
+    <svg v-if="isClear" @click.stop="changeClose" class="abs ar5 hand close abst" viewBox="0 0 1024 1024" width="16" height="16">
+      <path
+        d="M512 102.4a409.6 409.6 0 1 0 409.6 409.6 409.6 409.6 0 0 0-409.6-409.6z m181.248 518.144a51.2 51.2 0 0 1-72.704 72.704L512 584.192l-108.544 109.056a51.2 51.2 0 0 1-72.704-72.704L439.808 512 330.752 403.456a51.2 51.2 0 0 1 72.704-72.704L512 439.808l108.544-109.056a51.2 51.2 0 0 1 72.704 72.704L584.192 512z"
+        fill="#aaa"></path>
+    </svg>
+    <div @click.stop :style="inputHeight" v-if="visible" class="abs zi-8888 al0">
       <div class="flex-line bc-fff ra-5 sha-card pp10 fd-c">
         <div class="w-280 flex ai-c pb5 pt5 jc-b">
           <div @click="changeYear('prev')" class="pl15 pr10 hand">
@@ -63,6 +68,17 @@
             </div>
           </section>
         </div>
+        <div v-if="time" class="flex w-280 bt-e ai-c pt10 jc-c">
+          <input @blur="blurDate" maxlength="2" v-model="selectHour" class="ipt w-45 centers h-25 ipt-auto" type="text">
+          <span class="fs-12 pl5">:</span>
+          <input @blur="blurDate" maxlength="2" v-model="selectMinute" class="ipt w-45 centers ml5 h-25 ipt-auto" type="text">
+          <span class="fs-12 pl5">:</span>
+          <input @blur="blurDate" maxlength="2" v-model="selectSecond" class="ipt w-45 centers ml5 h-25 ipt-auto" type="text">
+          <!-- <span class="fs-12 pl5">秒</span> -->
+          <div class="flex ai-c flex-1 jc-e">
+            <div @click="btnTime" class="w-40 h-25 btn ra-5 flex ai-c hand jc-c fc-aa b-d btn-auto">此刻</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -72,10 +88,14 @@
 import { Vue, Prop, Model } from 'vue-property-decorator';
 import formatDate from '@lib/dateFormat';
 export default class datepick extends Vue {
+  $refs;
   @Prop({ type: String, default: "yyyy-MM-dd" }) format;
   @Prop({ type: String, default: "small" }) size;
+  @Prop({ type: Boolean, default: false }) time;
   @Prop({ type: String, default: "请选择日期" }) placeholder;
+  @Prop({ type: Boolean, default: false }) curr;
   @Prop({ type: String, default: "" }) class;
+  @Prop({ type: String, default: "" }) dom;
   @Model('modelValue', { type: [String, Number, Date], default: "" }) value;
   visible = false;
   weekList = ['日', '一', '二', '三', '四', '五', '六'];
@@ -87,19 +107,84 @@ export default class datepick extends Vue {
   currYear = new Date().getFullYear();
   selectMonth = new Date().getMonth() + 1;// 默认从0开始，所以需要加1
   selectDay = 0;
-  selectHour = 0;
-  selectMinute = 0;
-  selectSecond = 0;
+  selectHour: any = "00";
+  selectMinute: any = "00";
+  selectSecond: any = "00";
   nextYear = 0;
   prevYear = 0;
   starDay = 0;
   endDay = 0;
   isMonth = false;
   isYear = false;
+  isClear = false;
+
+  isFirst = true
+
+  off: any = { width: 0, height: 0 }
 
   inputSelect(e) {
     this.visible = !this.visible;
     document.addEventListener("click", this.setSelectPop);
+  }
+
+  blurDate() {
+    this.selectHour = this.selectHour.length < 2 ? ('0' + this.selectHour) : this.selectHour;
+    this.selectHour = Number(this.selectHour) > 24 ? '24' : this.selectHour
+    this.selectMinute = this.selectMinute.length < 2 ? ('0' + this.selectMinute) : this.selectMinute;
+    this.selectMinute = Number(this.selectMinute) > 60 ? '60' : this.selectMinute
+    this.selectSecond = this.selectSecond.length < 2 ? ('0' + this.selectSecond) : this.selectSecond;
+    this.selectSecond = Number(this.selectSecond) > 60 ? '60' : this.selectSecond
+  }
+
+  btnTime() {
+    let curr = formatDate(new Date(), "hh-mm-ss");
+    curr = curr.split('-');
+    this.selectHour = curr[0]
+    this.selectMinute = curr[1]
+    this.selectSecond = curr[2]
+  }
+
+  getElementLeft() {
+    if (!this.$refs.dateInput) return { left: 0, top: 0 };
+    let element: any = this.$refs.dateInput;
+    var left = element.offsetLeft;
+    var top = element.offsetTop;
+    var current = element.offsetParent;
+
+    while (current !== null) {
+      left += current.offsetLeft;
+      top += current.offsetTop;
+      current = current.offsetParent;
+    }
+
+    return { left, top };
+  }
+
+  btnMouse(type) {
+    if (type == 'move') {
+      if (this.value) {
+        this.isClear = true;
+      }
+    } else {
+      this.isClear = false;
+    }
+  }
+
+  get inputHeight() {
+    let off = this.getElementLeft();
+    let height = this.$el.offsetHeight + 324;
+    let styles = "";
+    if ((off.top + height) > this.off.height) {
+      styles = `top:-324px;`;
+    } else {
+      styles = `top:${this.$refs.dateInput.offsetHeight + 3}px;`;
+    }
+    console.log((off.left + 300), this.off.width)
+    if ((off.left + 300) > this.off.width) {
+      let len = this.off.width - 300 - off.left - 2;
+      styles += `left:${len}px;`
+    }
+    return styles;
   }
 
   setClass(item) {
@@ -116,11 +201,26 @@ export default class datepick extends Vue {
 
   setDateValue(item) {
     if (item.type == 'curr') {
-      let value = formatDate(item.value, this.format);
+      let value: any = item.value;
+      if (this.time) {
+        value += ` ${this.selectHour}:${this.selectMinute}:${this.selectSecond}`;
+      }
+      let format = this.format;
+      if (format != "timestamp" && this.time && !format.includes('hh')) {
+        format = format + " hh:mm:ss"
+      }
+      value = formatDate(value, format);
       this.$emit('update:modelValue', value)
       this.visible = false;
       document.removeEventListener('click', this.setSelectPop)
     }
+  }
+
+  changeClose() {
+    this.$emit('update:modelValue', "")
+    this.visible = false;
+    this.isClear = false;
+    document.removeEventListener('click', this.setSelectPop)
   }
 
   changeYear(type) {
@@ -170,7 +270,21 @@ export default class datepick extends Vue {
 
   get currValue() {
     if (this.value) {
-      return formatDate(this.value, 'yyyy-MM-dd')
+      let years = formatDate(this.value, "yyyy-MM-dd-hh-mm-ss").split('-');
+      this.selectYear = Number(years[0]);
+      this.selectMonth = Number(years[1]);
+      this.selectDay = Number(years[2]);
+      this.selectHour = Number(years[3]);
+      this.selectMinute = Number(years[4]);
+      this.selectSecond = Number(years[5]);
+      this.isFirst=false
+    }
+    if (this.value) {
+      if (this.time) {
+        return formatDate(this.value, 'yyyy-MM-dd hh:mm:ss')
+      } else {
+        return formatDate(this.value, 'yyyy-MM-dd')
+      }
     }
     else {
       return ""
@@ -220,15 +334,26 @@ export default class datepick extends Vue {
   }
 
   mounted() {
-    if (this.value) {
-      let years = formatDate(this.value, "yyyy-MM-dd-hh-mm-ss").split('-');
-      this.selectYear = Number(years[0]);
-      this.selectMonth = Number(years[1]);
-      this.selectDay = Number(years[2]);
-      this.selectHour = Number(years[3]);
-      this.selectMinute = Number(years[4]);
-      this.selectSecond = Number(years[5]);
+    if (this.dom) {
+      this.off = {
+        width: document.getElementById(this.dom)?.scrollWidth,
+        height: document.getElementById(this.dom)?.scrollHeight
+      }
+    } else {
+      this.off = {
+        width: document.body.scrollWidth,
+        height: document.body.scrollHeight
+      }
     }
+    // if (this.value) {
+    //   let years = formatDate(this.value, "yyyy-MM-dd-hh-mm-ss").split('-');
+    //   this.selectYear = Number(years[0]);
+    //   this.selectMonth = Number(years[1]);
+    //   this.selectDay = Number(years[2]);
+    //   this.selectHour = Number(years[3]);
+    //   this.selectMinute = Number(years[4]);
+    //   this.selectSecond = Number(years[5]);
+    // }
   }
 
   get row() {

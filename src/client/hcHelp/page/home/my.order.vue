@@ -4,6 +4,7 @@
       <section class="flex w-all m-height">
         <menus></menus>
         <div class="flex-1 bc-fff mt20 pl50 pr50 pt30 mb20 ml30">
+          <div></div>
           <table class="table w-all">
             <thead>
               <tr>
@@ -16,6 +17,15 @@
                 <td>订单时间</td>
               </tr>
             </thead>
+            <tr v-for="item in list">
+              <td>{{item.xxxx||'订单编号'}}</td>
+              <td>产品名称</td>
+              <td>品牌名称</td>
+              <td>收货人</td>
+              <td>手机号</td>
+              <td>收货地址</td>
+              <td>订单时间</td>
+            </tr>
           </table>
         </div>
       </section>
@@ -32,6 +42,8 @@ import menus from './user.vue';
   }
 })
 export default class App extends Vue {
+  $store; $msg; spinner;
+  list: any = [];
 }
 </script>
 

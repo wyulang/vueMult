@@ -33,7 +33,7 @@
           <div class="w-all flex flex-1 fd-c pp15">
             <div class="w-all title fs-16 fc-000 mb10 fbb line-1">{{item.productName}}</div>
             <div class="flex-1 w-all">
-              <div class=" w-all fs-14 lh-26 line-3"> {{item.remarks}}</div>
+              <div v-html="item.remarks" class=" w-all fs-14 lh-26 line-3"></div>
             </div>
             <div class="fc-aaa fs-12">{{item.createDate}}</div>
           </div>

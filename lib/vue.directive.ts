@@ -27,16 +27,14 @@ function toDecimal(v, num) {
 
 function getElementLeft(element) {
   var actualLeft = element.offsetLeft;
-  var top = element.offsetTop;
   var current = element.offsetParent;
 
   while (current !== null) {
     actualLeft += current.offsetLeft;
-    top += current.offsetTop;
     current = current.offsetParent;
   }
 
-  return {left:0,top};
+  return actualLeft;
 }
 
 export default function (app) {
@@ -112,4 +110,10 @@ export default function (app) {
       console.log(left, width, document.body.clientWidth)
     }
   })
+
+  app.directive('valid', {
+    mounted: (el, binding, vnode) => {
+    }
+  })
+
 }

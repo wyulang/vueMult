@@ -2,9 +2,9 @@
   <transition name="dialog">
     <section v-if="modelValue" :id="zindex" :style="{'z-index':zindex}" class="_dialog" ref='digBox'>
       <div v-if="isModel" @click="fullClose&&closeWin()" :style="{'z-index':zindex+1}" class="model"></div>
-      <section ref='dialog' class="_dialog_body" :style='{top:top+"px",left:left+"px","min-width":setWidth,height:"min-height"+"px"}'>
+      <section :id="'dig'+(zindex+1)" ref='dialog' class="_dialog_body" :style='bodyStyle'>
         <!-- 头部 -->
-        <div v-if="isHeader" @mousedown='startMove' class="_dialog_title" data-type='move'>
+        <div v-if="isHeader" id="fy-dialog" class="_dialog_title" data-type='move'>
           <span v-html="title"></span>
           <div @click.stop="closeWin">
             <span class="_diglog_close">✖</span>
@@ -24,12 +24,14 @@
 </template>
 
 <script lang='ts'>
-import { Vue, Prop, Model, Watch,Ref } from 'vue-property-decorator';
+import { Vue, Prop, Model, Watch, Ref } from 'vue-property-decorator';
 export default class dig extends Vue {
   @Prop({ default: true, type: Boolean }) fullClose;
   @Prop({ default: true, type: Boolean }) isHeader;
   @Prop({ default: true, type: Boolean }) isModel;//显示遮罩层？
-  @Prop({ default: 300, type: [String, Number] }) width;
+  @Prop({ default: "300", type: [String, Number] }) width;
+  @Prop({ default: "300", type: [String, Number] }) maxWidth;
+  @Prop({ default: "100", type: [String, Number] }) minWidth;
   @Prop({ default: 100, type: [String, Number] }) height;
   @Prop({ default: '标题', type: String }) title;
   @Model('modelValue', { type: Boolean, default: false }) value!: boolean
@@ -43,6 +45,9 @@ export default class dig extends Vue {
   left: Number = 0;
   max: Boolean = false;
   zindex: Number = 1000;
+  currWidth = 0;
+  currHeight = 0;
+  isFirst = true;
 
   get setWidth() {
     if (this.width.includes('%')) {
@@ -53,17 +58,33 @@ export default class dig extends Vue {
     return this.width
   }
 
-  private initSize() {
-    let width=Number(String(this.width).replace(/[^\d]/g,""));
-    let height=Number(String(this.width).replace(/[^\d]/g,""));
-    this.top = this.oldTop = (document.documentElement.clientHeight - height) / 4;
-    this.left = this.oldLeft = (document.documentElement.clientWidth - width) / 2;
+  get bodyStyle() {
+    let width = this.width;
+    if (!isNaN(this.width)) {
+      width = this.width + 'px';
+    }
+    if (this.currWidth) {
+      if (this.currWidth < Number(this.minWidth.replace(/[^\d]/g, ''))) {
+        width = this.minWidth;
+      } else {
+        width = this.currWidth + 'px';
+      }
+    }
+    let top = (document.documentElement.clientHeight - this.currHeight) / 3.5;
+    let left = (document.documentElement.clientWidth - Number(width.replace(/[^\d]/g, ''))) / 2
+    return {
+      'width': width,
+      'top': top + 'px',
+      'left': left + 'px'
+    }
   }
 
-  private startMove(e) { // 鼠标按下
+  startMove(e) { // 鼠标按下
     if (e.button === 0) { // 鼠标左键按下
-      let x = e.pageX - this.dialog.offsetLeft;  // 鼠标与窗口边框距离
-      let y = e.pageY - this.dialog.offsetTop;
+      let id: any = 'dig' + (Number(this.zindex) + 1)
+      let digs: any = document.getElementById(id);
+      let x = e.pageX - digs.offsetLeft;  // 鼠标与窗口边框距离
+      let y = e.pageY - digs.offsetTop;
       let maxW = window.innerWidth; // 最大拖动位置（不能拖离页面可视区）
       let maxH = window.innerHeight;
       document.onmousemove = (e) => { // 鼠标移动
@@ -73,28 +94,18 @@ export default class dig extends Vue {
         if (loginX > maxW) loginX = maxW;
         if (loginY < 0) loginY = 0;
         if (loginY > maxH) loginY = maxH;
-        this.dialog.style.left = loginX - x + 'px';  // 设置窗口位置，跟随鼠标移动
-        this.dialog.style.top = loginY - y + 'px';
+        digs.style.left = loginX - x + 'px';
+        digs.style.top = loginY - y + 'px';
       }
       document.onmouseup = (el) => {  // 鼠标抬起，清除鼠标移动事件
         document.onmousemove = null;
       }
     }
   }
-  private closeWin() {
-    this.$emit('update:modelValue', false)
-    this.initSize();
-  }
 
-  private maxWin() {
-    this.max = !this.max;
-    if (this.max) {
-      this.top = 0;
-      this.left = 0;
-    } else {
-      this.top = this.oldTop;
-      this.left = this.oldLeft;
-    }
+  private closeWin() {
+    this.isFirst = false;
+    this.$emit('update:modelValue', false)
   }
 
 
@@ -104,31 +115,36 @@ export default class dig extends Vue {
     let maxZindex: any = 1000;
     if (newVal) {
       if (dig.length) {
-        dig.forEach((item, index) => {
-          item.children[0].style.display = "none";
-          if (maxZindex < parseInt(item.style.zIndex)) {
-            maxZindex = parseInt(item.style.zIndex);
+        for (let i = 0; i < dig.length; i++) {
+          dig[i].children[0].style.display = "none";
+          if (maxZindex < parseInt(dig[i].style.zIndex)) {
+            maxZindex = parseInt(dig[i].style.zIndex);
           }
-        });
+        }
       }
-
       if (this.zindex == 1000) {
         this.zindex = parseInt(maxZindex) + 1;
       }
     } else {
       if (dig.length > 1) {
         let ids: any = [];
-        dig.forEach((v, index) => {
-          ids.push({ id: parseInt(v.id), index: index });
-        })
+        for (let i = 0; i < dig.length; i++) {
+          dig[i].children[0].style.display = "none";
+          ids.push({ id: parseInt(dig[i].id), index: i });
+        }
+
         let item = ids.sort((a, b) => { return a.id - b.id })[ids.length - 2];
         dig[item.index].children[0].style.display = "";
       }
     }
   }
 
-  mounted() {
-    this.initSize()
+  updated() {
+    if (this.$refs.dialog && this.value) {
+      this.currWidth = (this.$refs.dialog as HTMLElement).offsetWidth;
+      this.currHeight = (this.$refs.dialog as HTMLElement).offsetHeight;
+      document.getElementById('fy-dialog')?.addEventListener('mousedown', this.startMove)
+    }
   }
 }
 </script>

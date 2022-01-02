@@ -1,6 +1,5 @@
 'use strict';
-import baseApi from '../../../../lib/baseApi';
-import { msg } from '@component/message/message';
+import baseApi from '@lib/baseApi';
 
 class webapi extends baseApi {
   constructor() {
@@ -8,25 +7,50 @@ class webapi extends baseApi {
   }
   getEnvName() {
     let env = 'prod';
-    let url: any = window.location.hostname;
-    // if (!isNaN(url.replace(/[^\d]/g, ''))) {
-    //   env = "me";
-    // }
-    if (url.includes('172.16')) {
-      env = "me";
-    }
+    let url = window.location.hostname;
     if (url.includes('localhost')) {
       env = "inte"
+    } else if (url.includes('m.zy.86edu')) {
+      env = 'inte';
+    } else if (url.includes('zy.pc.86edu')) {
+      env = 'inte';
+    } else if (url.includes('zy.m.test')) {
+      env = 'inte';
     }
     return env;
   }
 
   envUrl = {
-    me: 'http://172.16.20.33:8081',
-    // me: 'http://172.16.10.8:8081',
-    inte: 'http://10.35.65.214:8081',
+    me: 'http://api.zytest.86edu.net',
+    inte: 'http://api.zytest.86edu.net',
     // inte: 'https://api.zy.86edu.net',
-    prod: 'http://10.32.30.174:8089',
+    prod: 'https://api.zy.86edu.net',
+  };
+
+  joyred = {
+    me: 'http://192.168.1.174:8185',
+    inte: 'https://gaokaoquerytest.joyread.com.cn',
+    prod: 'https://gaokaoquerytest.joyread.com.cn',
+  }
+
+  payUrl = {
+    me: 'http://m.zy.86edu.net',
+    inte: 'http://m.zy.86edu.net',
+    prod: 'https://mzy.86edu.net',
+  }
+
+  loginServer = {
+    me: 'http://api.zytest.86edu.net/api/app/person/info',
+    inte: 'http://api.zytest.86edu.net/api/app/person/info',
+    prod: 'https://api.zy.86edu.net/api/app/person/info',
+  }
+
+  isPro = window.location.protocol == 'https:' ? 'https:' : 'http:';
+
+  interest = {
+    me: this.isPro + '//api.interest.test.86edu.net',
+    inte: this.isPro + '//api.interest.test.86edu.net',
+    prod: this.isPro + '//api.interest.test.86edu.net',
   }
 
   getDomainApi() {
@@ -34,39 +58,24 @@ class webapi extends baseApi {
   }
 
   contentType(type) {
-    return type ? type : "application/json";
+    if (type == 'json') {
+      return "application/json"
+    } else {
+      return "application/x-www-form-urlencoded; charset=UTF-8"
+    }
   }
 
   //请求体BUG提示
   getMessage(err, type) {
-    if (err?.code) {
-      if (err.code == 404) {
-        msg({ message: err.data, type: "error" })
-        window.location.href = "#/"
-        return
-      }
-      else if (err.code == 400) {
-        msg({ message: '未找到接口：' + err.data.path, type: "error" });
-        return;
-      }
-    }
-    if (type == 'then') {
-      if (!err?.data) {
-        msg({ message: 'CORS跨域出错或连接失败', type: "error" })
-      } else if (err.data && err.data.code == 5001) {
-        msg({ message: err.data.tip, type: "error" })
-        window.location.href = "#/";
-      }
-      else if (err.data && err.data.code != 2000) {
-        msg({ message: err.data.tip, type: "error" })
-      }
-    } else {
-      msg({ message: err.data, type: "error" })
-    }
+
   }
 
   setToken(token) {
-    return {}
+    let ts = this.storage('accesstoken');
+    if (token) {
+      ts = 'SUPER_ADMIN_TOKEN_FOR_GAOKAO';
+    }
+    return { accesstoken: ts }
   }
 
 }

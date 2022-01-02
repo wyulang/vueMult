@@ -39,6 +39,14 @@ const routes = [
         },
       },
       {
+        path: '/product/detail/order/:code',
+        component: () => import(/* webpackChunkName: "introduce" */ './page/home/order.vue'),
+        name: 'home.detail.order',
+        mate: {
+          title: ""
+        },
+      },
+      {
         path: '/user/order',
         component: () => import(/* webpackChunkName: "introduce" */ './page/home/my.order.vue'),
         name: 'user.order',

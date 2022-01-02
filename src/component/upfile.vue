@@ -1,5 +1,5 @@
 <template>
-  <div class="_upfile w-all h-all">
+  <div v-if="isRel" :class="class" class="_upfile h-all">
     <div v-if="type=='slot'" class="w-all rel h-all">
       <input ref="input" @change="upfileImage(1)" title=" " :accept="accept" class="abs op-0 fs-0 zi-110 w-all hand at0 ab0 ar0 ab0" type="file">
       <div class="w-all rel zi-100 h-all">
@@ -46,15 +46,24 @@
 import { Vue, Prop, Model } from 'vue-property-decorator';
 export default class App extends Vue {
   @Prop({ type: String, default: 'image' }) type;
+  @Prop({ type: [String, Number], default: 0 }) index;
+  // 当一个页面多次使用时可用这个返回类型
+  @Prop({ type: String, default: '' }) ftype;
   @Prop({ type: String, default: '' }) tip;
   @Prop({ type: String, default: '' }) icon;
+  @Prop({ type: String, default: 'w-all' }) class;
   @Prop({ type: String, default: 'image/gif,image/jpeg,image/jpg,image/png,image/svg' }) accept;
   @Model('modelValue', { type: [String, Number, Boolean], default: "" }) value;
   @Prop({ type: Function }) upSuccess;
+  isRel=true;
   upfileImage() {
-    let input: any = this.$refs.input
+    let input: any = this.$refs.input;
     let files = input.files;
-    this.upSuccess(files[0])
+    this.upSuccess(files[0], this.ftype, this.index)
+    this.isRel=false;
+    this.$nextTick(()=>{
+      this.isRel=true;
+    })
   }
 }
 </script>
@@ -68,12 +77,12 @@ export default class App extends Vue {
     }
   }
   .tis-value {
-    .boxs{
+    .boxs {
       display: none;
     }
     &:hover {
       .boxs {
-        display:flex;
+        display: flex;
       }
     }
   }

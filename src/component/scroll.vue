@@ -1,9 +1,8 @@
 <template>
-  <section :style="sHeight" class="scrollbar rel h-all">
-    <main ref="main" @scroll="onScroll" @mouseleave="e=>{visible=false}" @mousemove="e=>{visible=true}" class="h-all scrollbar-contaniner w-all">
+  <section ref="scroll" :style="sHeight" @mouseleave="visible=false" @mousemove="visible=true" class="scrollbar rel h-all">
+    <main ref="main" @scroll="onScroll" class="h-all scrollbar-contaniner w-all">
       <slot></slot>
     </main>
-
     <transition name="scrollbar-fade">
       <section ref="instance" v-show="visible" class="scrollbar__bar" @mousedown="clickTrackHandler">
         <div ref="thumb" class="scrollbar__thumb" :style="thumbStyle" @mousedown="clickThumbHandler"></div>
@@ -19,16 +18,17 @@ export default class App extends Vue {
   @Prop({ type: [String, Number], default: 0 }) width;
   @Prop({ type: [String, Number], default: 0 }) maxHeight;
   @Prop({ type: [String, Number], default: 0 }) height;
-  @Prop({ type: Boolean, default: false }) auto;
+  @Prop({ type: [String, Number], default: "" }) auto;
   mainHeight = 0;
   bodyHeight = 0;
   oldHeight = 0;
   mainWidth = 0;
   getLevel = 0;
-  visible = true;
+  visible = false;
   moveY = 0;
   @Ref('instance') instance;
   @Ref('thumb') thumb;
+  @Ref('main') main;
   cursorDown = false;
   barStore = {};
   onselectstartStore: any = null;
@@ -62,18 +62,22 @@ export default class App extends Vue {
 
   //当未设height/maxHeight时，取父级高度，直到取到高度为止
   getPrentHeight(el) {
-    if (el.parentNode.clientHeight) {
-      return el.parentNode.clientHeight
-    } else {
-      this.getPrentHeight(el.parentNode)
+    if (el) {
+      if (el.parentNode&&el.parentNode.clientHeight) {
+        return el.parentNode.clientHeight
+      } else {
+        this.getPrentHeight(el.parentNode)
+      }
+    }else{
+      return 0
     }
   }
 
   initHeight() {
     let curr = 0;
-    if (this.$el) {
-      this.bodyHeight = this.$el.firstElementChild.scrollHeight;
-      curr = this.$el.firstChild.clientHeight || this.getPrentHeight(this.$el)
+    if (this.main) {
+      this.bodyHeight = this.main.firstElementChild&&this.main.firstElementChild.scrollHeight;
+      curr = this.main.firstChild.clientHeight || this.getPrentHeight(this.$el)
     }
     if (this.mheight) {
       let child = this.$el.firstElementChild.scrollHeight;
@@ -87,10 +91,15 @@ export default class App extends Vue {
       curr = this.heights;
     }
     this.mainHeight = curr;
+    if (this.auto) {
+      this.moveY = this.moveY = (this.auto * 100) / this.mainHeight;
+      this.wrap.scrollTop = this.auto;
+    }
+
   }
 
   updated() {
-    let curr = this.$el.firstChild.scrollHeight || 0;
+    let curr = this.main.firstChild.scrollHeight || 0;
     if (curr > this.bodyHeight && this.bodyHeight) {
       this.initHeight();
     }
@@ -123,7 +132,6 @@ export default class App extends Vue {
   }
 
   get thumbStyle() {
-    console.log(this.scrollHeight, 'scrollHeight')
     const style = {} as any
     let translate = `translateY(${this.moveY}%)`;
     style.height = this.scrollHeight

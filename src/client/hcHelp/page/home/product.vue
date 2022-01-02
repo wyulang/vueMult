@@ -40,7 +40,7 @@
         <div class="pl15 flex-1 flex fd-c">
           <div class="mb15 mt10 flex ai-c">
             <h1 class="fs-22 fb">{{item.productName}}</h1>
-            <span class="ml10 fc-999 fs-14">品牌：铝膜铝膜铝膜</span>
+            <span class="ml10 fc-999 fs-14"></span>
           </div>
           <div class="line-3 fs-16 lh-30">
             <div v-html="item.remarks"></div>

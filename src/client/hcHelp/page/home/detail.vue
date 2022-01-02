@@ -17,31 +17,30 @@
     <div class="w-1300 m-auto">
       <div class="flex pt50 pb50">
         <div class="detail-img hidden">
-          <img class="w-all ra-5 h-all" src="http://admin.baikehuicai.com/storage/common/20210529/20210529233551_6.jpg" alt="">
+          <img class="w-all ra-5 h-all" :src="$store.state.picUrl+info.fileId" alt="">
         </div>
         <div class="flex fd-c flex-1 pl60">
           <div class="fs-28 fb fc-000">{{info.productName}}</div>
           <div class="flex mt30 fs-16 fc-999 ai-c">
-            <span>规格:OX201</span>
+            规格:<span v-for="(item,i) in info.productSpecList">{{item.specName+'|'}} </span>
           </div>
           <div class="flex fc-999 fs-16 mt10 ai-c">
-            <span>品牌：铝膜铝膜铝膜:OX201</span>
+            品牌：<span v-for="(item,i) in info.brandList">{{item.brandName+'|'}} </span>
           </div>
 
           <div class="lh-30 mt60 fs-16">
-            产品介绍： 铝膜对拉片，简称拉片，是新型建材铝膜板的零配件，是代替螺丝作用的，其特点有稳定性强，施工灵活快速，工厂化施工更快捷，避免留空，操作简单，更加紧固
+            <div v-html="'产品介绍：'+info.content"></div>
           </div>
 
           <div class="flex mt30">
-            <button class="btn btn-primary btn-big ra-3">报价</button>
+            <button @click="$router.push('/product/detail/order/'+this.$route.params.code)" class="btn btn-primary btn-big ra-3">报价</button>
           </div>
         </div>
       </div>
 
       <div class="mt30 w-all">
         <div class="flex ai-c w-all fs-20 bb-e pb30 mb30 fb fc-000">产品详情</div>
-        <div class="lh-30 pb50 fs-16">
-         {{info.remarks}}
+        <div v-html="info.remarks" class="lh-30 pb50 fs-16">
         </div>
       </div>
     </div>
@@ -54,13 +53,30 @@ import { Vue } from 'vue-property-decorator';
 import { Swiper, Autoplay, Pagination } from 'swiper';
 Swiper.use([Autoplay, Pagination])
 export default class App extends Vue {
-  $store;
+  $store; $msg; spinner;
+  isModel = false;
   info: any = {}
+  brandId = "";
+  barndList: any = []
+  goodSpec: any = []
+  goods: any = []
+  list: any = [//根据需要自己变更
+    { label: "规格", value: "", filed: "goodCode", type: "select", isDis: false },
+    { label: "单价", value: "", filed: "price", type: "amount", isDis: false },
+    { label: "数量", value: "", filed: "num", type: "number", isDis: false }
+  ];
+
+  tableHeader = [];
+  tableBody = [];
+
+
+
   created() {
     let code = this.$route.params.code || "";
     this.$store.dispatch('getProductDetail', code).then(res => {
       if (res.code == 200) {
         this.info = res.data;
+        this.info.specs = res.data.productSpecList;
       }
     })
   }
@@ -74,5 +90,21 @@ export default class App extends Vue {
 .detail-img {
   width: 700px;
   height: 600px;
+}
+.detail-table {
+  thead tr td {
+    padding: 12px 10px;
+    background-color: #f5f6f6;
+    font-size: 15px;
+    color: #888;
+  }
+  tbody tr td {
+    padding: 3px;
+    font-size: 13px;
+    min-height: 30px;
+  }
+  tbody tr {
+    color: #555;
+  }
 }
 </style>

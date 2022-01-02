@@ -7,7 +7,11 @@
           <span @click="$router.push('/')" class="fs-18 h-all hand">首页</span>
           <span @click="$router.push('/product')" class="fs-18 h-all hand ml50">产品列表</span>
         </div>
-        <div class="flex ai-c">
+        <div v-if="$store.state.user" class="flex ai-c">
+          <span @click="$router.push('/user/order')" class="hand">{{$store.state.user.nickname||$store.state.user.fullName}}</span>
+          <span @click="btnOut" class="fc-aa ml6 hand">退出登录</span>
+        </div>
+        <div v-else class="flex ai-c">
           <span @click="isLogin=true" class="fs-16 hand">登录</span>
           <span class="ml7 mr7">|</span>
           <span @click="isRegedit=true" class="fs-16 hand">注册</span>
@@ -15,7 +19,7 @@
       </div>
     </div>
   </header>
-  <router-view class="m-body"></router-view>
+  <router-view class="bodyHeight"></router-view>
   <footer class="flex footer fc-ddd bc-3 ai-c jc-c">
     <div class="w-all">
       <div class="w-1300 m-auto ai-c flex h-60 jc-b fs-18">
@@ -37,11 +41,11 @@
       <div class="fs-22 centers">登录</div>
       <div class="rel mt30 flex bc-f6 ra-29 h-57 ai-c">
         <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
-        <input @blur="btnCheckVip" v-model="user.username" placeholder="请输入手机号码" class="h-57 pp10 fs-16 bc-t" type="text">
+        <input @blur="btnCheckVip" v-model="user.username" placeholder="请输入账号" class="h-57 pp10 fs-16 bc-t" type="text">
       </div>
       <div class="rel mt30 flex bc-f6 ra-29 h-57 ai-c">
         <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
-        <input @blur="btnCheckVip" v-model="user.password" placeholder="请输入手机号码" class="h-57 pp10 fs-16 bc-t" type="password">
+        <input @blur="btnCheckVip" v-model="user.password" placeholder="请输入密码" class="h-57 pp10 fs-16 bc-t" type="password">
       </div>
 
       <div @click="goLogin" style="box-shadow: 0 8px 20px rgba(137,191,234,.64);" class="mt25 bc-primary fc-fff hand fs-26 flex ai-c jc-c h-63 ra-32">
@@ -94,6 +98,11 @@ export default class App extends Vue {
   isLogin = false;
   isRegedit=false;
 
+  btnOut(){
+    this.$store.commit('outLogin');
+    this.$router.push('/')
+  }
+
   toRegedit(){
       if(!this.info.username){
       this.$msg.error('登录名不为空！');
@@ -139,6 +148,9 @@ export default class App extends Vue {
 </script>
 
 <style lang='less'>
+.bodyHeight{
+  min-height: calc(100vh - 170px);
+}
 .login-bc {
   background: rgba(0, 0, 0, 0.5);
   // z-index: 1355;

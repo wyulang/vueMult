@@ -16,28 +16,34 @@
 import { Vue, Prop, Emit, Model } from 'vue-property-decorator';
 import { isString, isArray, isObject } from '../../lib/lang';
 export default class checkbox extends Vue {
-  @Prop({ type: [Array, String, Boolean, Number], default: false }) data;
-  @Prop({ type: [Array, String], default: ['#3699ff', '#888'] }) color;
-  @Prop({ type: [String, Number], default: 20 }) size;
-  @Prop({ type: String, default: "" }) class;
-  @Model('modelValue', { type: [Array, String, Number, Boolean], default: false }) value;
-  @Prop({ type: [Array, Object, String], default: ['label', 'value'] }) props;
-
-  // 使用方法
+  // 数组[{ label: "是", value: "1" }, { label: "否", value: "2" }] 返回value=[1,2] 详情看get path
   // <checkboxs v-model="value" :data='[{ label: "是", value: "1" }, { label: "否", value: "2" }]'></checkboxs> value=[1,2]
   // <checkboxs v-model="value"></checkboxs>  value=true
+  @Prop({ type: [Array, String, Boolean, Number], default: false }) data;
+  // 选中颜色
+  @Prop({ type: [Array, String], default: ['#3699ff', '#888'] }) color;
+  // 选中框大小
+  @Prop({ type: [String, Number], default: 20 }) size;
+  // 样式
+  @Prop({ type: String, default: "" }) class;
+  @Model('modelValue', { type: [Array, String, Number, Boolean], default: false }) value;
+  // label,value 显示值
+  @Prop({ type: [Array, Object, String], default: ['label', 'value'] }) props;
 
   get path() {
     let list: any = [];
+    // 当data为数组
     if (isArray(this.data)) {
       let curr = this.value || [];
       list = this.data.map(v => {
         return { value: v[this.parm.value], label: v[this.parm.label], select: curr.some(s => String(v[this.parm.value]) === String(s)) }
       })
     } else {
+      // 当data 为bool类型
       if (typeof this.data === "boolean") {
         list = [{ value: this.value || false, label: "", select: this.value }]
       } else {
+        // 当data为 String Number 或为空时
         list = [{ value: this.data, label: "", select: String(this.value) === String(this.data) }]
       }
     }

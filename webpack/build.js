@@ -1,8 +1,8 @@
   
 const webpack = require('webpack') // 加载 webpack
-const webpackConfig = require("./webpack.prod.js");
+const webpackConfig = require("./prod.js");
 const chalk = require('chalk');
-let config = require('./webpack.config.js');
+let config = require('./config.js');
 
 if(Object.keys(config.entry).length==0){
   process.stderr.write(chalk.blueBright.bold(` 请输入要打包的对像 如 npm run build demo  \n\n`));
