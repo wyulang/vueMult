@@ -86,7 +86,7 @@ const routes = [
         name: 'manage.index',
         mate: {
           title: "每日统计",
-          icon:"icon-shujutongji"
+          icon: "icon-shujutongji"
         },
       },
       {
@@ -95,7 +95,7 @@ const routes = [
         name: 'manage.product.type',
         mate: {
           title: "产品类别",
-          icon:'icon-fenlei-copy'
+          icon: 'icon-fenlei-copy'
         },
       },
       {
@@ -104,7 +104,7 @@ const routes = [
         name: 'manage.product',
         mate: {
           title: "产品管理",
-          icon:'icon-chanpinguanli'
+          icon: 'icon-chanpinguanli'
         },
       },
       {
@@ -113,7 +113,7 @@ const routes = [
         name: 'manage.order',
         mate: {
           title: "订单管理",
-          icon:'icon-dingdan'
+          icon: 'icon-dingdan'
         },
       },
       {
@@ -122,7 +122,7 @@ const routes = [
         name: 'manage.brand',
         mate: {
           title: "品牌管理",
-          icon:'icon-pinpaishezhi'
+          icon: 'icon-pinpaishezhi'
         },
       },
       {
@@ -131,7 +131,7 @@ const routes = [
         name: 'manage.user',
         mate: {
           title: "会员管理",
-          icon:'icon-huiyuan'
+          icon: 'icon-huiyuan'
         },
       },
       {
@@ -140,7 +140,7 @@ const routes = [
         name: 'manage.admin',
         mate: {
           title: "职员管理",
-          icon:'icon-yonghu'
+          icon: 'icon-yonghu'
         },
       },
     ]
@@ -151,5 +151,11 @@ export const router = createRouter({
   history: createWebHashHistory(),
   routes
 });
+
+router.beforeEach((to, from, next) => {
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+  next();
+})
 
 export const menus = routes;

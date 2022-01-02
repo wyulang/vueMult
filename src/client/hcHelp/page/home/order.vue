@@ -1,45 +1,17 @@
 <template>
   <div class="w-all">
-    <div style="height:500px;" class="swiper-container hidden">
-      <div class="swiper-wrapper h-all">
-        <div class="swiper-slide h-all">
-          <div :style="{'background-image':`url(${require('../../assets/banner.1.jpg').default})`}" class="slide-inner bs-c bc-no h-all">
-          </div>
-        </div>
-        <div class="swiper-slide">
-          <div :style="{'background-image':`url(${require('../../assets/banner.2.jpg').default})`}" class="slide-inner bs-c bc-no h-all">
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="w-all">
+    <div v-if="isOrder" class="w-all">
       <div style="min-height:700px" class="w-1300 m-auto">
-        <div id="order" class="mt30 mb20 w-all">
-          <div class="flex ai-c w-all fs-20 bb-e pb30 mb20 fb fc-000">报价详情</div>
-
-          <div class="flex pb10 ai-c">
+        <div id="order" class="mt60 mb40 w-all">
+          <div class="flex ai-c w-all fs-30 bb-e jc-c pb30 mb20 fb fc-000">{{info.productName}}报价</div>
+          <div class="flex fs-18 pb10 ai-c">
             <span>品牌：</span>
             <div class="flex-line ra-5 hidden ai-c">
-              <div @click="btnBrand(item)" :class="{'bc-primary fc-fff':item.value==brandId,'bc-f2':item.brandCode!=brandId}" v-for="item in barndList" class="h-32 centent hand lh-32 pl10 pr10">{{item.brandName}}</div>
+              <div @click="btnBrand(item)" :class="{'bc-primary fc-fff':item.value==brandId,'bc-f2':item.brandCode!=brandId}" v-for="item in barndList" class="h-42 centent hand lh-42 pl15 pr15">{{item.brandName}}</div>
             </div>
           </div>
 
-          <div class="flex w-all mb20 mt20 ai-c">
-            <div class="flex fs-14 mr15 ai-c">
-              <span class=" mr10">联系电话：</span>
-              <Input class="w-200" clear v-model="info.phone"></Input>
-            </div>
-            <div class="flex fs-14 mr15 ai-c">
-              <span class=" mr10">收货地址：</span>
-              <Input class="w-200" clear v-model="info.address"></Input>
-            </div>
-            <div class="flex flex-1 fs-14 ai-c">
-              <span class="nowrap mr10">留言：</span>
-              <Input class="w-all" clear v-model="info.address"></Input>
-            </div>
-          </div>
-
-          <table class="w-all detail-table">
+          <table class="w-all mt20 detail-table">
             <thead>
               <tr>
                 <td v-for="item in tableHeader">{{item}}</td>
@@ -51,7 +23,7 @@
                 <td v-for="(child,ids) in item">
                   <input v-if="child.type=='number'" :disabled="child.isDis" v-number v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
                   <input v-else-if="child.type=='amount'" :disabled="child.isDis" v-number.2 v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
-                  <selects @change="v=>{changeGood(v,item)}" :index="ids" v-else-if="child.type=='select'" v-model="child.value" :data="child.list"></selects>
+                  <selects @change="v=>{changeGood(v,item)}" :dislist="sepattr['dis'+child.label]" :type="child.label" :index="ids" v-else-if="child.type=='select'" v-model="child.value" :data="sepattr['spec'+child.label]"></selects>
                   <input v-else v-model="child.value" :disabled="child.isDis" class="w-all ipt ipt-small h-all" type="text">
                 </td>
                 <td class="nowrap">
@@ -72,10 +44,60 @@
             <span></span>
             <div class="flex ai-c">
               <div class="fc-danger">总计：￥{{countPrice}}</div>
-              <div @click="btnSave" class="btn ra-4 btn-big ml10 btn-primary">生成报价单</div>
+              <div @click="btnSave" class="btn ra-4 btn-big ml10 btn-primary">确定认下单</div>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div v-else class="w-800 fs-18 m-auto">
+      <div class="flex ai-c w-all fs-30 bb-e jc-c mt50 pb30 mb20 fb fc-000">生成订单</div>
+      <table class="w-all order-table">
+        <thead>
+          <tr>
+            <td v-for="item in tableHeader">{{item}}</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item,index) in tableBody">
+            <td v-for="(child,ids) in item">{{child.value&&String(child.value).includes('-')?child.value.split('-')[0]:child.value}}</td>
+          </tr>
+          <tr>
+            <td :colspan="tableHeader.length-1">总价</td>
+            <td>{{countPrice}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="flex "></div>
+      <div class="flex mt35 ai-c">
+        <div class="flex w-120">收货人：</div>
+        <Input size="big" v-model="order.name"></Input>
+      </div>
+      <div class="flex mt15 ai-c">
+        <div class="flex w-120">联系电话：</div>
+        <Input size="big" v-model="order.phone"></Input>
+      </div>
+      <div class="flex mt15 ai-c">
+        <div class="flex w-120">送货地址：</div>
+        <Input size="big" v-model="order.address"></Input>
+      </div>
+      <div class="flex mt15 ai-c">
+        <div class="flex w-120">收货时间：</div>
+        <date size="big" v-model="order.time"></date>
+      </div>
+      <div class="flex mt15 ai-c">
+        <div class="flex w-120">包装要求：</div>
+        <Input size="big" v-model="order.need"></Input>
+      </div>
+      <div class="flex mt15 ai-c">
+        <div class="flex w-120">备注：</div>
+        <textarea name="" id="" v-model="order.remark" class="ipt pp12 ipt-auto w-all h-120"></textarea>
+      </div>
+      <div class="flex mt35 mb50 ai-c">
+        <div class="w-100"></div>
+        <div @click="btnOrder" class="btn ml5 ra-4 btn-big btn-primary">立即下单</div>
+        <span class="fc-aa ml15 hand fs-12">[下单合同]</span>
       </div>
     </div>
   </div>
@@ -93,12 +115,45 @@ export default class App extends Vue {
   barndList: any = []
   goodSpec: any = []
   goods: any = []
-  list: any = [//根据需要自己变更
+  isOrder = true;
+  order: any = {
+    name: "",
+    address: "",
+    phone: "",
+    time: "",
+    need: "",
+    remark: ""
+  }
+  list: any = [];
 
-  ];
+  tableHeader: any = [];
+  tableBody: any = [];
 
-  tableHeader = [];
-  tableBody = [];
+  btnOrder() {
+    if (this.order.name.length < 1) {
+      this.$msg.error(`收货人不能为空！`);
+      return;
+    }
+    if (this.order.phone < 1) {
+      this.$msg.error(`联系电话不能为空！`);
+      return;
+    }
+    if (!this.order.address) {
+      this.$msg.error(`联系地址不能为空！`);
+      return;
+    }
+    if (!this.order.remark) {
+      this.$msg.error(`备注不能为空！`);
+      return;
+    }
+    // 这个接口需要自己去添加
+    this.$store.dispatch('接口名',this.order).then(res=>{
+      if(res.code==200){
+        this.$msg.success('下单成功')
+        this.$router.push('/')
+      }
+    })
+  }
 
   get countPrice() {
     let total = 0;
@@ -117,18 +172,25 @@ export default class App extends Vue {
   btnBrand(item) {
     this.brandId = item.brandCode;
     this.initData(this.brandId)
-    // this.tableBody.forEach(item => {
-    //   item.find(f => f.filed == 'price').value = "";
-    // })
     this.btnAdd();
   }
 
+  currIndex = 0;
   changeGood(data, item) {
     let currItem = item.find(f => f.filed == 'price');
-    // currItem.value = data.item.price;
-    console.log(item, data)
+    let dis = this.sepattr['dis' + data.type];
+    if (dis) {
+      dis = [];
+      this.tableBody.forEach(element => {
+        element.forEach(v => {
+          if (v.label == data.type && v.value) {
+            dis.push(v.value)
+          }
+        });
+      });
+    }
+    this.sepattr['dis' + data.type] = dis;
     item[data.index].props.goodsCode = data.item.goodsCode;
-    // item.data.goodsCode=data.item.goodsCode;
     let dal = item.filter(v => v.props).length;
     let mod = item.filter(v => v.props && v.props.goodsCode == data.item.goodsCode).length;
     if (dal && dal == mod) {
@@ -139,7 +201,7 @@ export default class App extends Vue {
   }
 
   btnSave() {
-    let sql = []
+    let sql: any = []
     let isNext = true;
     for (let i = 0; i < this.tableBody.length; i++) {
       let item = this.tableBody[i];
@@ -151,7 +213,7 @@ export default class App extends Vue {
       let data: any = {};
       item.forEach(v => {
         if (v.props) {
-          data[v.filed] = v.label + ':' + v.value;
+          data[v.filed] = v.label + ':' + v.value.split('-')[0];
         } else {
           data[v.filed] = v.value;
         }
@@ -160,9 +222,12 @@ export default class App extends Vue {
       data.productCode = this.info.productCode
       sql.push(data)
     }
-    console.log(sql);
+    this.order.orderItemList=sql;
+    this.order.price=this.countPrice;
+    // console.log(sql);
     if (!isNext) return;
-    this.$store.dispatch('buildOrder', { orderItemList: sql })
+    this.isOrder = false;
+    // this.$store.dispatch('buildOrder', { orderItemList: sql })
   }
 
   delItem(item, index) {
@@ -182,36 +247,38 @@ export default class App extends Vue {
     })
   }
 
+  sepattr = {};
   initData(brandCode) {
     this.list = [];
+    this.sepattr = {};
     this.$store.dispatch('getBrandProductPrices', { productCode: this.$route.params.code, brandCode }).then(res => {
       if (res.code == 200) {
         let list: any = []
         res.data && res.data.forEach(item => {
           item.goodsSpecList.forEach(v => {
-            let curr = list.find(f => f.label == v.specName);
+            let filed = 'spec' + v.specName;
+            let curr = this.sepattr[filed];
             // 当找到相同属性名称
             if (curr) {
-              if (!curr.list) {
-                curr.list = [];
-              }
               // 追加一条下拉记录
-              curr.list.push({ label: v.specValue, value: v.specValue, price: item.priceList[0].price, goodsCode: v.goodsCode })
+              curr.push({ label: v.specValue, value: v.specValue + '-' + v.goodsCode, price: item.priceList[0].price, goodsCode: v.goodsCode, filed })
             } else {
+              this.sepattr['dis' + v.specName] = [];
+              this.sepattr[filed] = [{ value: v.specValue + '-' + v.goodsCode, label: v.specValue, price: item.priceList[0].price, goodsCode: v.goodsCode, filed }];
               // 当没找到相同属性名称 新建表列，并把当前属性加到下拉选项中
-              list.push({ label: v.specName, isDis: false, filed: 'spec' + v.id, value: '', type: 'select', props: { goodsCode: "", brandCode: item.brandCode }, list: [{ value: v.specValue, label: v.specValue, price: item.priceList[0].price, goodsCode: v.goodsCode }] })
+              list.push({ label: v.specName, isDis: false, filed: 'spec' + v.id, value: '', type: 'select', props: { goodsCode: "", brandCode: item.brandCode } })
             }
           })
         })
         this.list = [
           ...list,
-          { label: "数量", value: "", filed: "num", type: "number", isDis: false },
-          { label: "单价", value: "", filed: "price", type: "amount", isDis: false },
+          { label: "数量", value: "1", filed: "num", type: "number", isDis: false },
+          { label: "单价", value: "", filed: "price", type: "amount", isDis: true },
           { label: "合计", value: "", filed: "count", type: "text", isDis: true }
         ]
         this.tableHeader = this.list.map(v => v.label);
         this.tableBody = [JSON.parse(JSON.stringify(this.list))]
-        console.log(this.list)
+        // console.log(this.list)
       }
     });
   }
@@ -222,23 +289,9 @@ export default class App extends Vue {
       if (res.code == 200) {
         this.info = res.data;
         this.info.specs = res.data.productSpecList;
-        // res.data.productSpecList.forEach((v, index) => {
-        //   this.list.push({ label: v.specName, value: "", filed: "spec" + (index + 1), type: "text", isDec: true, isDis: false })
-        // })
-
-        // this.list.push()
         this.barndList = res.data.brandList.map(v => { return { label: v.brandName, value: v.brandCode, ...v } });
-
-        //品牌默认选中第一个
         this.brandId = this.barndList.length && this.barndList[0].brandCode;
         this.initData(this.brandId);
-        // debugger
-
-
-        // this.list.unshift({ label: "产品", value: this.info.productName, filed: "product", type: "text", isDis: false })
-        // this.tableBody.push(JSON.parse(JSON.stringify(this.list)))
-
-
       }
     })
   }
@@ -267,6 +320,25 @@ export default class App extends Vue {
   }
   tbody tr {
     color: #555;
+  }
+}
+.order-table {
+  // border: 1px solid #ddd;
+  td {
+    border: 1px solid #ddd;
+  }
+  thead tr td {
+    padding: 12px 10px;
+    // background-color: #f5f6f6;
+    font-size: 15px;
+    text-align: center;
+    color: #888;
+  }
+  tbody tr td {
+    padding: 12px 10px;
+    font-size: 13px;
+    text-align: center;
+    min-height: 30px;
   }
 }
 </style>

@@ -15,7 +15,7 @@
       <div :style="{'top':`${options.inputHeight+4}px`}" v-show="visible" class="_selects_dropdown abs zi-8888 ra-5 hidden ar0 al0">
         <scrollbar :auto="options.valueHeight" v-if="isRefresh" maxHeight="220">
           <div v-if="path.length" class="flex ra-5 hidden bc-fff w-all fd-c">
-            <div :class="{'_is_select fb':currValue.value==item.value}" @click="selectItem(item)" v-for="(item,index) in path" class="hand h-34">
+            <div :class="{'_is_select fb':currValue.value==item.value,'is_dis':(item.disabled&&currValue.value!=item.value)}" @click="selectItem(item)" v-for="(item,index) in path" class="hand h-34">
               <slot>
                 <div :class="setStyle(item)" class="flex  h-all w-all pl15 ai-c">{{item.label}}</div>
               </slot>
@@ -51,6 +51,7 @@ export default class App extends Vue {
   @Prop({ type: [String, Object, Array], default: "" }) props;
   // 禁用
   @Prop({ type: Boolean, default: false }) disabled;
+  @Prop({ type: Array, default: null }) dislist;
   // list [{label:'',value}] -- [1,2]=>[{labe:1,value:1},{label:2,value:2}]
   @Prop({ type: Array, default: [] }) data!: any;
   // 当一个页面使多次使用时，可根据类型分别给值
@@ -118,10 +119,14 @@ export default class App extends Vue {
     let soure = (this.isLazy ? this.list : this.data) || []
     return soure.map(v => {
       let curr = {}
+      let disabled = false;
+      if (this.dislist) {
+        disabled = this.dislist.map(v => String(v)).includes(String(v[this.parm.value]))
+      }
       if (typeof v !== 'object') {
-        curr = { label: v, value: v }
+        curr = { label: v, value: v, disabled }
       } else {
-        curr = { ...v, label: v[this.parm.label], value: v[this.parm.value] }
+        curr = { ...v, label: v[this.parm.label], value: v[this.parm.value], disabled }
       }
       return curr
     })
@@ -167,6 +172,7 @@ export default class App extends Vue {
   }
 
   selectItem(item) {
+    if(item.disabled) return;
     this.lazyValue = "";
     let curr = item.value;
     if (this.exclude && curr != String(this.value)) {
