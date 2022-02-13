@@ -1,7 +1,7 @@
 <template>
   <header class="h-60 bc-3 flex fc-fff ai-c jc-c">
     <div class="w-1300 flex jc-b ai-c">
-      <span @click="$router.push('/')" class="fb hand fs-22">汇材帮</span>
+      <span @click="$router.push('/')" class="fb hand fs-22">百科汇采</span>
       <div class="flex flex-1 jc-b pl80 ai-c">
         <div class="flex ai-c">
           <span @click="$router.push('/')" class="fs-18 h-all hand">首页</span>

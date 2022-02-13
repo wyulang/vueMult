@@ -1,7 +1,11 @@
 <template>
   <div class="w-all">
-    <div style="height:500px;" class="swiper-container hidden">
-      <div class="swiper-wrapper h-all">
+    <div style="height:300px;" class="bc-primary flex ai-c hidden">
+      <div class="w-1300 fc-fff fs-40 m-auto">
+        百科汇采—商品百科全书，汇聚采购，采购人的专业网站
+      </div>
+    <!-- <div style="height:300px;" class="swiper-container hidden"> -->
+      <!-- <div class="swiper-wrapper h-all">
         <div class="swiper-slide h-all">
           <div :style="{'background-image':`url(${require('../../assets/banner.1.jpg').default})`}" class="slide-inner bs-c bc-no h-all">
           </div>
@@ -10,7 +14,7 @@
           <div :style="{'background-image':`url(${require('../../assets/banner.2.jpg').default})`}" class="slide-inner bs-c bc-no h-all">
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
 
     <div class="w-all bc-f6 flex ai-c jc-c pt30 pb30">

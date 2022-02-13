@@ -23,7 +23,7 @@
                 <td v-for="(child,ids) in item">
                   <input v-if="child.type=='number'" :disabled="child.isDis" v-number v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
                   <input v-else-if="child.type=='amount'" :disabled="child.isDis" v-number.2 v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
-                  <selects @change="v=>{changeGood(v,item)}" :dislist="sepattr['dis'+child.label]" :type="child.label" :index="ids" v-else-if="child.type=='select'" v-model="child.value" :data="sepattr['spec'+child.label]"></selects>
+                  <selects @change="v=>{changeGood(v,item)}" :type="child.label" :index="ids" v-else-if="child.type=='select'" v-model="child.value" :data="sepattr['spec'+child.label]"></selects>
                   <input v-else v-model="child.value" :disabled="child.isDis" class="w-all ipt ipt-small h-all" type="text">
                 </td>
                 <td class="nowrap">
