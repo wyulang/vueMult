@@ -172,7 +172,7 @@ export default class App extends Vue {
   }
 
   selectItem(item) {
-    if(item.disabled) return;
+    if (item.disabled) return;
     this.lazyValue = "";
     let curr = item.value;
     if (this.exclude && curr != String(this.value)) {
@@ -191,7 +191,7 @@ export default class App extends Vue {
 
   @Emit('clear')
   changeClose() {
-    this.isLazy=false;
+    this.isLazy = false;
     this.isClear = false;
     this.visible = false;
     this.$emit('update:modelValue', "");
@@ -213,6 +213,9 @@ export default class App extends Vue {
   }
 
   get inputClass() {
+    if (!['small', 'big', 'visible'].includes(this.size)) {
+      return this.size
+    }
     return {
       'ipt-small': this.size == 'small',
       'ipt-big': this.size == 'big',

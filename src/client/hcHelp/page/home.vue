@@ -39,13 +39,13 @@
         <i @click="isLogin=false" class=" abs at-20 hand iconfont icon-delete fs-23  ar-20 fc-999"></i>
       </div>
       <div class="fs-22 centers">登录</div>
-      <div class="rel mt30 flex bc-f6 ra-29 h-57 ai-c">
+      <div class="rel mt30 flex bc-f6 ra-29 h-50 ai-c">
         <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
-        <input @blur="btnCheckVip" v-model="user.username" placeholder="请输入账号" class="h-57 pp10 fs-16 bc-t" type="text">
+        <input @blur="btnCheckVip" v-model="user.username" placeholder="请输入账号" class="h-50 pp10 fs-16 bc-t" type="text">
       </div>
-      <div class="rel mt30 flex bc-f6 ra-29 h-57 ai-c">
+      <div class="rel mt30 flex bc-f6 ra-29 h-50 ai-c">
         <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
-        <input @blur="btnCheckVip" v-model="user.password" placeholder="请输入密码" class="h-57 pp10 fs-16 bc-t" type="password">
+        <input @blur="btnCheckVip" v-model="user.password" placeholder="请输入密码" class="h-50 pp10 fs-16 bc-t" type="password">
       </div>
 
       <div @click="goLogin" style="box-shadow: 0 8px 20px rgba(137,191,234,.64);" class="mt25 bc-primary fc-fff hand fs-26 flex ai-c jc-c h-63 ra-32">
@@ -61,17 +61,25 @@
         <i @click="isRegedit=false" class=" abs at-20 hand iconfont icon-delete fs-23  ar-20 fc-999"></i>
       </div>
       <div class="fs-22 centers">注册</div>
-      <div class="rel mt30 flex bc-f6 ra-29 h-57 ai-c">
+      <div class="rel mt30 flex ra-29 h-50 ai-c">
         <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
-        <input v-model="info.username" placeholder="请输入您的姓名" class="h-57 pp10 fs-16 bc-t" type="text">
+        <radio v-model="info.type" :data="[{value:'客户',label:'客户'},{value:'产品合伙人',label:'产品合伙人'},{value:'业务合伙人',label:'业务合伙人'}]"></radio>
       </div>
-      <div class="rel mt30 flex bc-f6 ra-29 h-57 ai-c">
+      <div class="rel mt10 flex bc-f6 ra-29 h-50 ai-c">
         <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
-        <input v-model="info.phone" placeholder="请输入手机号码" class="h-57 pp10 fs-16 bc-t" type="text">
+        <input v-model="info.username" placeholder="请输入您的姓名" class="h-50 pp10 fs-16 bc-t" type="text">
       </div>
-      <div class="rel mt30 flex bc-f6 ra-29 h-57 ai-c">
+      <div class="rel mt30 flex bc-f6 ra-29 h-50 ai-c">
         <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
-        <input v-model="info.password" placeholder="请输入您的密码" class="h-57 pp10 fs-16 bc-t" type="password">
+        <input v-model="info.phone" placeholder="请输入手机号码" class="h-50 pp10 fs-16 bc-t" type="text">
+      </div>
+      <div class="rel mt30 flex bc-f6 ra-29 h-50 ai-c">
+        <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
+        <input v-model="info.password" placeholder="请输入您的密码" class="h-50 pp10 fs-16 bc-t" type="password">
+      </div>
+      <div v-if="info.type=='客户'" class="rel mt30 flex bc-f6 ra-29 h-50 ai-c">
+        <span class="iconfont iconshouji ml10 fc-bbb fs-25"></span>
+        <input v-model="info.code" placeholder="请输入您邀请码" class="h-50 pp10 fs-16 bc-t">
       </div>
 
       <div @click="toRegedit" style="box-shadow: 0 8px 20px rgba(137,191,234,.64);" class="mt25 bc-primary fc-fff hand fs-26 flex ai-c jc-c h-63 ra-32">
@@ -93,7 +101,9 @@ export default class App extends Vue {
   info: any = {
     username:"",
     password:"",
-    phone:""
+    phone:"",
+    type:'客户',
+    code:''
   }
   isLogin = false;
   isRegedit=false;
