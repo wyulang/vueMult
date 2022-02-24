@@ -61,6 +61,8 @@ export default class App extends Vue {
   @Ref('selectInput') selectInput;
   //禁用列表 禁用哪些值如:[1,2]
   @Prop({ type: Array }) exclude;
+  // 条件查询
+  @Prop({ type: Object }) fter;
   isClear = false;
   visible = false;
   isOpen = false;
@@ -117,6 +119,9 @@ export default class App extends Vue {
   get path() {
     let list: any = [];
     let soure = (this.isLazy ? this.list : this.data) || []
+    if (this.fter && this.fter.value && this.fter.label) {
+      soure = soure.filter(v => v[this.fter.label] == this.fter.value)
+    }
     return soure.map(v => {
       let curr = {}
       let disabled = false;

@@ -23,7 +23,7 @@
                 <td v-for="(child,ids) in item">
                   <input v-if="child.type=='number'" :disabled="child.isDis" v-number v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
                   <input v-else-if="child.type=='amount'" :disabled="child.isDis" v-number.2 v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
-                  <selects @change="v=>{changeGood(v,item)}" :type="child.label" :index="ids" v-else-if="child.type=='select'" v-model="child.value" :data="sepattr['spec'+child.label]"></selects>
+                  <selects @change="v=>{changeGood(v,item)}" :fter="ids?fter:null" :type="child.label" :index="ids" v-else-if="child.type=='select'" v-model="child.value" :data="sepattr['spec'+child.label]"></selects>
                   <input v-else v-model="child.value" :disabled="child.isDis" class="w-all ipt ipt-small h-all" type="text">
                 </td>
                 <td class="nowrap">
@@ -147,8 +147,8 @@ export default class App extends Vue {
       return;
     }
     // 这个接口需要自己去添加
-    this.$store.dispatch('接口名',this.order).then(res=>{
-      if(res.code==200){
+    this.$store.dispatch('接口名', this.order).then(res => {
+      if (res.code == 200) {
         this.$msg.success('下单成功')
         this.$router.push('/')
       }
@@ -176,20 +176,27 @@ export default class App extends Vue {
   }
 
   currIndex = 0;
+  fter = {
+    label: 'goodsCode',
+    value: ''
+  }
   changeGood(data, item) {
-    let currItem = item.find(f => f.filed == 'price');
-    let dis = this.sepattr['dis' + data.type];
-    if (dis) {
-      dis = [];
-      this.tableBody.forEach(element => {
-        element.forEach(v => {
-          if (v.label == data.type && v.value) {
-            dis.push(v.value)
-          }
-        });
-      });
+    if (!data.index) {
+      this.fter.value = data.item.goodsCode
     }
-    this.sepattr['dis' + data.type] = dis;
+    let currItem = item.find(f => f.filed == 'price');
+    // let dis = this.sepattr['dis' + data.type];
+    // if (dis) {
+    //   dis = [];
+    //   this.tableBody.forEach(element => {
+    //     element.forEach(v => {
+    //       if (v.label == data.type && v.value) {
+    //         dis.push(v.value)
+    //       }
+    //     });
+    //   });
+    // }
+    // this.sepattr['dis' + data.type] = dis;
     item[data.index].props.goodsCode = data.item.goodsCode;
     let dal = item.filter(v => v.props).length;
     let mod = item.filter(v => v.props && v.props.goodsCode == data.item.goodsCode).length;
@@ -222,8 +229,8 @@ export default class App extends Vue {
       data.productCode = this.info.productCode
       sql.push(data)
     }
-    this.order.orderItemList=sql;
-    this.order.price=this.countPrice;
+    this.order.orderItemList = sql;
+    this.order.price = this.countPrice;
     // console.log(sql);
     if (!isNext) return;
     this.isOrder = false;
