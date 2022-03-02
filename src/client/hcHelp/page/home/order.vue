@@ -23,7 +23,7 @@
                 <td v-for="(child,ids) in item">
                   <input v-if="child.type=='number'" :disabled="child.isDis" v-number v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
                   <input v-else-if="child.type=='amount'" :disabled="child.isDis" v-number.2 v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
-                  <selects @change="v=>{changeGood(v,item)}" :fter="ids?fter:null" :type="child.label" :index="ids" v-else-if="child.type=='select'" v-model="child.value" :data="sepattr['spec'+child.label]"></selects>
+                  <selects @change="v=>{changeGood(v,item)}" :type="child.label" :index="child.curr" v-else-if="child.type=='select'" v-model="child.value" :data="child.curr>0?sepattr['sep'+String(child.curr)]:seplist"></selects>
                   <input v-else v-model="child.value" :disabled="child.isDis" class="w-all ipt ipt-small h-all" type="text">
                 </td>
                 <td class="nowrap">
@@ -116,6 +116,7 @@ export default class App extends Vue {
   goodSpec: any = []
   goods: any = []
   isOrder = true;
+  isFirstFile = ""
   order: any = {
     name: "",
     address: "",
@@ -180,32 +181,8 @@ export default class App extends Vue {
     label: 'goodsCode',
     value: ''
   }
-  changeGood(data, item) {
-    if (!data.index) {
-      this.fter.value = data.item.goodsCode
-    }
-    let currItem = item.find(f => f.filed == 'price');
-    // let dis = this.sepattr['dis' + data.type];
-    // if (dis) {
-    //   dis = [];
-    //   this.tableBody.forEach(element => {
-    //     element.forEach(v => {
-    //       if (v.label == data.type && v.value) {
-    //         dis.push(v.value)
-    //       }
-    //     });
-    //   });
-    // }
-    // this.sepattr['dis' + data.type] = dis;
-    item[data.index].props.goodsCode = data.item.goodsCode;
-    let dal = item.filter(v => v.props).length;
-    let mod = item.filter(v => v.props && v.props.goodsCode == data.item.goodsCode).length;
-    if (dal && dal == mod) {
-      currItem.value = data.item.price;
-    } else {
-      currItem.value = 0;
-    }
-  }
+
+
 
   btnSave() {
     let sql: any = []
@@ -255,28 +232,43 @@ export default class App extends Vue {
   }
 
   sepattr = {};
+  changeGood(data, item) {
+    let list = [];
+    if (String(data.index) === "0") {
+      list = this.baseList.filter(item => {
+        return item.goodsSpecList[0].specValue == data.value;
+      }).map(v => {
+        let dal = v.goodsSpecList[1]
+        return { value: dal.specValue, label: dal.specValue, goodsCode: dal.goodsCode, price: v.priceList[0].price }
+      })
+      this.sepattr['sep' + String(Number(data.index) + 1)] = list;
+    } else {
+      item.find(v => v.filed == 'price').value = data.item.price;
+    }
+  }
+
+  seplist = [];
+  baseList = [];
   initData(brandCode) {
     this.list = [];
-    this.sepattr = {};
     this.$store.dispatch('getBrandProductPrices', { productCode: this.$route.params.code, brandCode }).then(res => {
       if (res.code == 200) {
         let list: any = []
+        this.baseList = res.data;
         res.data && res.data.forEach(item => {
-          item.goodsSpecList.forEach(v => {
-            let filed = 'spec' + v.specName;
-            let curr = this.sepattr[filed];
-            // 当找到相同属性名称
-            if (curr) {
-              // 追加一条下拉记录
-              curr.push({ label: v.specValue, value: v.specValue + '-' + v.goodsCode, price: item.priceList[0].price, goodsCode: v.goodsCode, filed })
-            } else {
-              this.sepattr['dis' + v.specName] = [];
-              this.sepattr[filed] = [{ value: v.specValue + '-' + v.goodsCode, label: v.specValue, price: item.priceList[0].price, goodsCode: v.goodsCode, filed }];
-              // 当没找到相同属性名称 新建表列，并把当前属性加到下拉选项中
-              list.push({ label: v.specName, isDis: false, filed: 'spec' + v.id, value: '', type: 'select', props: { goodsCode: "", brandCode: item.brandCode } })
+          item.goodsSpecList.forEach((v, i) => {
+            if (!i) {
+              this.seplist.push(v.specValue)
             }
           })
         })
+
+        this.seplist = [...new Set(this.seplist)]
+
+        res.data[0].goodsSpecList.forEach((item, i) => {
+          list.push({ label: item.specName, value: '', filed: 'spec' + i, type: 'select', isDis: false, curr: i })
+        })
+
         this.list = [
           ...list,
           { label: "数量", value: "1", filed: "num", type: "number", isDis: false },
@@ -285,7 +277,7 @@ export default class App extends Vue {
         ]
         this.tableHeader = this.list.map(v => v.label);
         this.tableBody = [JSON.parse(JSON.stringify(this.list))]
-        // console.log(this.list)
+
       }
     });
   }
