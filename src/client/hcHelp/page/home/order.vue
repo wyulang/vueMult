@@ -195,20 +195,25 @@ export default class App extends Vue {
         break;
       }
       let data: any = {};
+
       item.forEach(v => {
-        if (v.props) {
-          data[v.filed] = v.label + ':' + v.value.split('-')[0];
+        if (v.filed.includes('spec')) {
+          data[v.filed] = v.label + ':' + v.value;
         } else {
           data[v.filed] = v.value;
         }
+        if (v.goodsCode) {
+          data.goodsCode = v.goodsCode
+        }
       });
+
       data.brandCode = this.brandId;
       data.productCode = this.info.productCode
       sql.push(data)
     }
     this.order.orderItemList = sql;
     this.order.price = this.countPrice;
-    // console.log(sql);
+    console.log(sql);
     if (!isNext) return;
     this.isOrder = false;
     // this.$store.dispatch('buildOrder', { orderItemList: sql })
@@ -242,8 +247,12 @@ export default class App extends Vue {
         return { value: dal.specValue, label: dal.specValue, goodsCode: dal.goodsCode, price: v.priceList[0].price }
       })
       this.sepattr['sep' + String(Number(data.index) + 1)] = list;
+      //清空其它已选属性和价格
+      item.filter(v => v.curr||v.filed=='price').forEach(v => v.value = '')
     } else {
-      item.find(v => v.filed == 'price').value = data.item.price;
+      let line = item.find(v => v.filed == 'price');
+      line.value = data.item.price;
+      line.goodsCode = data.item.goodsCode;
     }
   }
 
