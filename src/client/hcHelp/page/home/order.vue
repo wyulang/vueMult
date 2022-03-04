@@ -23,7 +23,7 @@
                 <td v-for="(child,ids) in item">
                   <input v-if="child.type=='number'" :disabled="child.isDis" v-number v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
                   <input v-else-if="child.type=='amount'" :disabled="child.isDis" v-number.2 v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
-                  <selects @change="v=>{changeGood(v,item)}" :type="child.label" :index="child.curr" v-else-if="child.type=='select'" v-model="child.value" :data="child.curr>0?sepattr['sep'+String(child.curr)]:seplist"></selects>
+                  <selects @change="v=>{changeGood(v,item,index)}" :type="child.label" :index="child.curr" v-else-if="child.type=='select'" v-model="child.value" :data="child.curr>0?sepattr['sep'+String(child.curr)]:seplist"></selects>
                   <input v-else v-model="child.value" :disabled="child.isDis" class="w-all ipt ipt-small h-all" type="text">
                 </td>
                 <td class="nowrap">
@@ -237,7 +237,7 @@ export default class App extends Vue {
   }
 
   sepattr = {};
-  changeGood(data, item) {
+  changeGood(data, item,ins) {
     let list = [];
     if (String(data.index) === "0") {
       list = this.baseList.filter(item => {
@@ -248,7 +248,7 @@ export default class App extends Vue {
       })
       this.sepattr['sep' + String(Number(data.index) + 1)] = list;
       //清空其它已选属性和价格
-      item.filter(v => v.curr||v.filed=='price').forEach(v => v.value = '')
+      this.tableBody[ins].filter(v => v.curr || v.filed == 'price').forEach(v => v.value = '')
     } else {
       let line = item.find(v => v.filed == 'price');
       line.value = data.item.price;
