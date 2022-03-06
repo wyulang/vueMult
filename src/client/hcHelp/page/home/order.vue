@@ -246,7 +246,7 @@ export default class App extends Vue {
           let curr = child.goodsSpecList.find(d => d.specName == line.label);
           list.push({ label: curr.specValue, value: curr.specValue, price: child.priceList[0].price, code: curr.goodsCode })
         })
-        line.data=list;
+        line.data = list;
         // this.sepattr['spec' + line.curr] = list;
         //   //清空其它已选属性和价格
         this.tableBody[ins].filter(v => v.curr || v.filed == 'price').forEach(v => v.value = '')
@@ -270,9 +270,10 @@ export default class App extends Vue {
   seplist = [];
   baseList = [];
   initData(brandCode) {
-    this.list = [];
     this.$store.dispatch('getBrandProductPrices', { productCode: this.$route.params.code, brandCode }).then(res => {
       if (res.code == 200) {
+        // debugger
+         this.list = [];
         let list: any = []
         this.baseList = res.data;
         res.data[0].goodsSpecList.forEach((item, i) => {
@@ -295,11 +296,10 @@ export default class App extends Vue {
           { label: "合计", value: "", filed: "count", type: "text", isDis: true }
         ]
         this.tableHeader = this.list.map(v => v.label);
-        if (!this.tableBody.length) {
-          this.tableBody.push(JSON.parse(JSON.stringify(this.list)))
-        } else {
-          this.tableBody = this.tableBody.filter(v => v.len)
-        }
+        this.tableBody=[JSON.parse(JSON.stringify(this.list))]
+        // if(!this.tableBody.length){
+        //   this.tableBody.push()
+        // }
       }
     });
   }
