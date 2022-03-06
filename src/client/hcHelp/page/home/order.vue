@@ -23,7 +23,7 @@
                 <td v-for="(child,ids) in item">
                   <input v-if="child.type=='number'" :disabled="child.isDis" v-number v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
                   <input v-else-if="child.type=='amount'" :disabled="child.isDis" v-number.2 v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
-                  <selects @change="v=>{changeGood(v,item,index)}" :type="child.label" :index="child.curr" v-else-if="child.type=='select'" v-model="child.value" :data="child.curr>0?sepattr['sep'+String(child.curr)]:seplist"></selects>
+                  <selects @change="v=>{changeGood(v,item,index)}" :type="child.label" :index="child.curr" v-else-if="child.type=='select'" v-model="child.value" :data="sepattr['spec'+String(child.curr)]"></selects>
                   <input v-else v-model="child.value" :disabled="child.isDis" class="w-all ipt ipt-small h-all" type="text">
                 </td>
                 <td class="nowrap">
@@ -237,23 +237,33 @@ export default class App extends Vue {
   }
 
   sepattr = {};
-  changeGood(data, item,ins) {
-    let list = [];
-    if (String(data.index) === "0") {
-      list = this.baseList.filter(item => {
-        return item.goodsSpecList[0].specValue == data.value;
-      }).map(v => {
-        let dal = v.goodsSpecList[1]
-        return { value: dal.specValue, label: dal.specValue, goodsCode: dal.goodsCode, price: v.priceList[0].price }
-      })
-      this.sepattr['sep' + String(Number(data.index) + 1)] = list;
-      //清空其它已选属性和价格
-      this.tableBody[ins].filter(v => v.curr || v.filed == 'price').forEach(v => v.value = '')
-    } else {
-      let line = item.find(v => v.filed == 'price');
-      line.value = data.item.price;
-      line.goodsCode = data.item.goodsCode;
-    }
+  changeGood(data, item, ins) {
+    item.filter(v => v.curr).forEach(line => {
+      let list = [];
+      // 存在codo 说明已选第一项
+      if (!data.item.code) {
+        this.baseList.filter(f => f.goodsSpecList.find(d => d.specValue == data.value)).forEach(child => {
+          let curr = child.goodsSpecList.find(d => d.specName == line.label);
+          list.push({ label: curr.specValue, value: curr.specValue, price: child.priceList[0].price, code: curr.goodsCode })
+        })
+        this.sepattr['spec' + line.curr] = list;
+        //   //清空其它已选属性和价格
+        this.tableBody[ins].filter(v => v.curr || v.filed == 'price').forEach(v => v.value = '')
+      } else {
+        setTimeout(() => {
+          //当所有属性都选完后设置价格，或则所有列表取同一商品下的属性
+          if (item.filter(v => v.curr).some(v => !v.value)) {
+            item.filter(v => v.curr).forEach(v => {
+              this.sepattr['spec' + v.curr] = this.sepattr['spec' + v.curr].filter(f => f.code == data.item.code)
+            })
+          } else {
+            let line = item.find(v => v.filed == 'price');
+            line.value = data.item.price;
+            line.goodsCode = data.item.code;
+          }
+        }, 100);
+      }
+    })
   }
 
   seplist = [];
@@ -264,20 +274,19 @@ export default class App extends Vue {
       if (res.code == 200) {
         let list: any = []
         this.baseList = res.data;
-        res.data && res.data.forEach(item => {
-          item.goodsSpecList.forEach((v, i) => {
+        res.data[0].goodsSpecList.forEach((item, i) => {
+          list.push({ label: item.specName, value: '', filed: 'spec' + i, type: 'select', isDis: false, curr: i });
+          let currlist = []
+          res.data.forEach(line => {
+            let dal = line.goodsSpecList.find(v => v.specName == item.specName);
             if (!i) {
-              this.seplist.push(v.specValue)
+              dal && currlist.push(dal.specValue);
             }
           })
+          if (!i) {
+            this.sepattr['spec' + i] = [...new Set(currlist)]
+          }
         })
-
-        this.seplist = [...new Set(this.seplist)]
-
-        res.data[0].goodsSpecList.forEach((item, i) => {
-          list.push({ label: item.specName, value: '', filed: 'spec' + i, type: 'select', isDis: false, curr: i })
-        })
-
         this.list = [
           ...list,
           { label: "数量", value: "1", filed: "num", type: "number", isDis: false },
