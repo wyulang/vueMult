@@ -23,7 +23,7 @@
                 <td v-for="(child,ids) in item">
                   <input v-if="child.type=='number'" :disabled="child.isDis" v-number v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
                   <input v-else-if="child.type=='amount'" :disabled="child.isDis" v-number.2 v-model="child.value" class="w-all ipt ipt-small h-all" type="text">
-                  <selects @change="v=>{changeGood(v,item,index)}" :type="child.label" :index="child.curr" v-else-if="child.type=='select'" v-model="child.value" :data="sepattr['spec'+String(child.curr)]"></selects>
+                  <selects @change="v=>{changeGood(v,item,index)}" :type="child.label" :index="child.curr" v-else-if="child.type=='select'" v-model="child.value" :data="child.curr?child.data:sepattr['spec'+String(child.curr)]"></selects>
                   <input v-else v-model="child.value" :disabled="child.isDis" class="w-all ipt ipt-small h-all" type="text">
                 </td>
                 <td class="nowrap">
@@ -246,7 +246,8 @@ export default class App extends Vue {
           let curr = child.goodsSpecList.find(d => d.specName == line.label);
           list.push({ label: curr.specValue, value: curr.specValue, price: child.priceList[0].price, code: curr.goodsCode })
         })
-        this.sepattr['spec' + line.curr] = list;
+        line.data=list;
+        // this.sepattr['spec' + line.curr] = list;
         //   //清空其它已选属性和价格
         this.tableBody[ins].filter(v => v.curr || v.filed == 'price').forEach(v => v.value = '')
       } else {
@@ -294,8 +295,11 @@ export default class App extends Vue {
           { label: "合计", value: "", filed: "count", type: "text", isDis: true }
         ]
         this.tableHeader = this.list.map(v => v.label);
-        this.tableBody = [JSON.parse(JSON.stringify(this.list))]
-
+        if (!this.tableBody.length) {
+          this.tableBody.push(JSON.parse(JSON.stringify(this.list)))
+        } else {
+          this.tableBody = this.tableBody.filter(v => v.len)
+        }
       }
     });
   }

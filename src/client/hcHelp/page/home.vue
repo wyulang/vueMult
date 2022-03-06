@@ -19,7 +19,7 @@
       </div>
     </div>
   </header>
-  <router-view class="bodyHeight"></router-view>
+  <router-view ></router-view>
   <footer class="flex footer fc-ddd bc-3 ai-c jc-c">
     <div class="w-all">
       <div class="w-1300 m-auto ai-c flex h-60 jc-b fs-18">
